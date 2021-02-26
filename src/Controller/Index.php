@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Controller\Modules\Pages\Controller;
+namespace App\Modules\Pages\Controller;
 
 
 class Index
