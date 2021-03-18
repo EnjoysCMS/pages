@@ -9,5 +9,14 @@
     "psr-4": {
       "App\\Module\\Pages\\": "src/"
     }
+  },
+  "extra": {
+    "module-name": "Pages",
+    "use-migrations": true,
+    "admin-links": {
+      "pages/admin": "Настройки",
+      "pages/admin/addpage": "Добавить новую страницу"
+
+    }
   }
 }

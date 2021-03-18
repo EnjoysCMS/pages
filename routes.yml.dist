@@ -1,0 +1,11 @@
+pages/admin:
+  path: /pages/admin/setting
+  controller: ['App\Module\Pages\Controller\Admin', 'init']
+  options:
+    aclComment: "[Pages][Admin] Настройки"
+
+pages/admin/addpage:
+  path: /pages/admin/addpage
+  controller: ['App\Module\Pages\Controller\Admin', 'add']
+  options:
+    aclComment: "[Pages][Admin] Добавить новую страницу"
