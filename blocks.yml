@@ -1,2 +1,8 @@
-App\Module\Pages\Blocks\TopView:  Топ просматриваемых страниц
+App\Module\Pages\Blocks\TopView:
+  name: Топ просматриваемых страниц
+  options:
+    limit:
+      value: 5
+      name: Лимит записей
+      description:
 

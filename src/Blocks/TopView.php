@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Module\Pages\Blocks;
 
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
+use Symfony\Component\Yaml\Yaml;
 
 class TopView extends AbstractBlock
 {
@@ -16,22 +17,6 @@ class TopView extends AbstractBlock
 
     public static function getMeta(): ?array
     {
-        return [
-            'name' => 'Топ просматриваемых страниц',
-            'options' => [
-                'limit' => [
-                    'value' => '5',
-                    'name' => 'Лимит записей',
-                    'description' => null,
-//                'form' => [
-//                    'type' => '',
-//                    'data' => [
-//                        'true' => 'Да',
-//                        'false' => 'Нет'
-//                    ]
-//                ]
-                ]
-            ]
-        ];
+        return Yaml::parseFile(__DIR__.'/../../blocks.yml')[__CLASS__];
     }
 }
