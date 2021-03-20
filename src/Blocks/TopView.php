@@ -11,16 +11,18 @@ class TopView extends AbstractBlock
 
     public function view()
     {
-      return 'test';
+        return 'test';
     }
 
-    public static function stockOptions(): ?array
+    public static function getMeta(): ?array
     {
         return [
-            'limit' => [
-                'value' => '5',
-                'name' => 'Лимит записей',
-                'description' => null,
+            'name' => 'Топ просматриваемых страниц',
+            'options' => [
+                'limit' => [
+                    'value' => '5',
+                    'name' => 'Лимит записей',
+                    'description' => null,
 //                'form' => [
 //                    'type' => '',
 //                    'data' => [
@@ -28,6 +30,7 @@ class TopView extends AbstractBlock
 //                        'false' => 'Нет'
 //                    ]
 //                ]
+                ]
             ]
         ];
     }
