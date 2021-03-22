@@ -11,12 +11,11 @@
     }
   },
   "extra": {
-    "module-name": "Pages",
+    "module-name": "Страницы",
     "use-migrations": true,
     "admin-links": {
-      "pages/admin": "Настройки",
-      "pages/admin/addpage": "Добавить новую страницу"
-
+      "pages/admin/list": "Обзор (Список)",
+      "pages/admin/addpage": "Добавить страницу"
     }
   }
 }

@@ -1,0 +1,46 @@
+{% extends '@a/layout.twig' %}
+{% block content %}
+
+    <section class="content">
+
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Список страниц</h2>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <table id="users-list" class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td><h4>{{ item.getTitle }}</h4>
+                                <small><a target="_blank"
+                                          href="{{ url('pages/item', {'slug': item.getSlug}) }}">{{ url('pages/item', {'slug': item.getSlug}) }}</a></small>
+                            </td>
+
+                            <td>
+                                {% if access2route('pages/admin/editpage') %}
+                                <a class="btn btn-sm btn-secondary" href="{{ url('pages/admin/editpage', {'id': item.getId}) }}">Редактировать</a>
+                                {% endif %}
+                                {% if access2route('pages/admin/delpage') %}
+                                <a class="btn btn-sm btn-danger" href="{{ url('pages/admin/delpage', {'id': item.getId}) }}">Удалить</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tfoot>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+    </section>
+{% endblock %}
