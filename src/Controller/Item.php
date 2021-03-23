@@ -41,16 +41,10 @@ class Item
             Error::code(404);
         }
 
-        $template_path = __DIR__ . '/../template/view.twig';
+        $template_path = '@m/pages/view.twig';
 
         if (!$this->twig->getLoader()->exists($template_path)) {
-            throw new \InvalidArgumentException(
-                sprintf(
-                    'copy %s to %s',
-                    realpath($template_path . '.dist'),
-                    str_replace('.dist', '', realpath($template_path . '.dist'))
-                )
-            );
+            $template_path =  __DIR__ . '/../template/view.twig';
         }
 
         return $this->twig->render(
