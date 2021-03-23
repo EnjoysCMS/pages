@@ -3,7 +3,8 @@
   "description": "Module Pages for EnjoysCMS",
   "type": "enjoyscms-module",
   "require": {
-    "oomphinc/composer-installers-extender": "^2.0"
+    "oomphinc/composer-installers-extender": "^2.0",
+    "enjoyscms/summernote": "^1.0"
   },
   "autoload": {
     "psr-4": {
