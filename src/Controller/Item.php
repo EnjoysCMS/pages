@@ -44,7 +44,7 @@ class Item
         $template_path = '@m/pages/view.twig';
 
         if (!$this->twig->getLoader()->exists($template_path)) {
-            $template_path =  __DIR__ . '/../template/view.twig';
+            $template_path =  __DIR__ . '/../template/view.twig.sample';
         }
 
         return $this->twig->render(
