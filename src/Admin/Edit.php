@@ -95,12 +95,15 @@ class Edit
                 'body' => $this->item->getBody(),
                 'scripts' => $this->item->getScripts(),
                 'slug' => $this->item->getSlug(),
+                'status' => [(string) $this->item->isStatus()]
             ]
         );
+        $form->checkbox('status')->fill(['1 ' =>'Активный']);
         $form->text('title', 'Название')->addRule(Rules::REQUIRED);
         $form->textarea('body', 'Контент')->addRule(Rules::REQUIRED)->setRows(10);
         $form->textarea('scripts', 'Скрипты');
         $form->text('slug', 'Уникальное имя')->addRule(Rules::REQUIRED)->setDescription('Используется в URL');
+
 
 //        $form->checkbox('groups', 'Группа')->fill(
 //            $this->entityManager->getRepository(Groups::class)->getGroupsArray()
@@ -118,6 +121,7 @@ class Edit
             $this->item->setBody($this->serverRequest->post('body'));
             $this->item->setScripts($this->serverRequest->post('scripts'));
             $this->item->setSlug($this->serverRequest->post('slug'));
+            $this->item->setStatus((bool)$this->serverRequest->post('status', 0));
 
             $this->entityManager->flush();
 

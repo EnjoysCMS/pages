@@ -10,27 +10,41 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-                <table id="users-list" class="table table-bordered table-striped">
+                {% if access2route('pages/admin/addpage') %}
+                    <a class="btn btn-sm btn-primary mb-3"
+                       href="{{ url('pages/admin/addpage') }}">Добавить новую страницу</a>
+                {% endif %}
+
+                <table id="users-list" class="table table-borderless">
                     <thead>
-                    <tr>
-                        <th></th>
-                        <th></th>
+                    <tr class="table-dark">
+                        <th scope="col">Заголовок</th>
+                        <th scope="col">Twig code</th>
+                        <th scope="col">Действие</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for item in items %}
-                        <tr>
-                            <td><h4>{{ item.getTitle }}</h4>
-                                <small><a target="_blank"
-                                          href="{{ url('pages/item', {'slug': item.getSlug}) }}">{{ url('pages/item', {'slug': item.getSlug}) }}</a></small>
+                        <tr {% if not item.isStatus %}class="table-light text-muted" {% endif %}>
+                            <td><h4>{{ item.getTitle }} {% if not item.isStatus %}<small>[не активный]</small> {% endif %}</h4>
+                                <div>
+                                    <small><a target="_blank"
+                                              href="{{ url('pages/item', {'slug': item.getSlug}) }}">{{ url('pages/item', {'slug': item.getSlug}) }}</a></small>
+                                </div>
+
+                            </td>
+                            <td>
+                                <code>&lcub;&lcub; url('pages/item', {'slug': '{{ item.getSlug }}'}) &rcub;&rcub;</code>
                             </td>
 
                             <td>
                                 {% if access2route('pages/admin/editpage') %}
-                                <a class="btn btn-sm btn-secondary" href="{{ url('pages/admin/editpage', {'id': item.getId}) }}">Редактировать</a>
+                                    <a class="btn btn-sm btn-secondary"
+                                       href="{{ url('pages/admin/editpage', {'id': item.getId}) }}">Редактировать</a>
                                 {% endif %}
                                 {% if access2route('pages/admin/delpage') %}
-                                <a class="btn btn-sm btn-danger" href="{{ url('pages/admin/delpage', {'id': item.getId}) }}">Удалить</a>
+                                    <a class="btn btn-sm btn-danger"
+                                       href="{{ url('pages/admin/delpage', {'id': item.getId}) }}">Удалить</a>
                                 {% endif %}
                             </td>
                         </tr>

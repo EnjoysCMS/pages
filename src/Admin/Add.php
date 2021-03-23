@@ -105,7 +105,8 @@ class Add
             $this->entityManager->persist($page);
             $this->entityManager->flush();
 
-            Redirect::http($this->urlGenerator->generate('pages/item', ['slug' => $page->getSlug()]));
+//            Redirect::http($this->urlGenerator->generate('pages/item', ['slug' => $page->getSlug()]));
+            Redirect::http($this->urlGenerator->generate('pages/admin/list'));
         } catch (OptimisticLockException | ORMException $e) {
             Error::code(500, $e->__toString());
         }

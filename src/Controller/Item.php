@@ -8,6 +8,7 @@ use App\Module\Pages\Entities\Items;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
+use Twig\Environment;
 
 class Item
 {
@@ -21,19 +22,42 @@ class Item
      * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
      */
     private $pagesRepository;
+    /**
+     * @var Environment
+     */
+    private Environment $twig;
 
-    public function __construct(ServerRequestInterface $serverRequest, EntityManager $entityManager)
+    public function __construct(ServerRequestInterface $serverRequest, EntityManager $entityManager, Environment $twig)
     {
         $this->serverRequest = $serverRequest;
         $this->pagesRepository = $entityManager->getRepository(Items::class);
+        $this->twig = $twig;
     }
 
     public function view()
     {
-        $page = $this->pagesRepository->findOneBy(['slug' => $this->serverRequest->get('slug')]);
+        $page = $this->pagesRepository->findOneBy(['slug' => $this->serverRequest->get('slug'), 'status' => true]);
         if ($page === null) {
             Error::code(404);
         }
 
+        $template_path = __DIR__ . '/../template/view.twig';
+
+        if (!$this->twig->getLoader()->exists($template_path)) {
+            throw new \InvalidArgumentException(
+                sprintf(
+                    'copy %s to %s',
+                    realpath($template_path . '.dist'),
+                    str_replace('.dist', '', realpath($template_path . '.dist'))
+                )
+            );
+        }
+
+        return $this->twig->render(
+            $template_path,
+            [
+                'page' => $page
+            ]
+        );
     }
 }
