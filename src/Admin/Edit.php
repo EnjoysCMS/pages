@@ -81,8 +81,8 @@ class Edit
             'form' => $this->renderer,
             'wysiwyg' => $wysiwyg->selector('#body'),
             'title' => 'Добавление страницы - Pages | Admin | ' . \EnjoysCMS\Core\Components\Helpers\Setting::get(
-                    'sitename'
-                )
+                'sitename'
+            )
         ];
     }
 
@@ -105,9 +105,9 @@ class Edit
         $form->text('slug', 'Уникальное имя')->addRule(Rules::REQUIRED)->setDescription('Используется в URL');
 
 
-//        $form->checkbox('groups', 'Группа')->fill(
-//            $this->entityManager->getRepository(Groups::class)->getGroupsArray()
-//        )->addRule(Rules::REQUIRED);
+        //        $form->checkbox('groups', 'Группа')->fill(
+        //            $this->entityManager->getRepository(Groups::class)->getGroupsArray()
+        //        )->addRule(Rules::REQUIRED);
 
         $form->submit('edit', 'Редактировать страницу');
         return $form;

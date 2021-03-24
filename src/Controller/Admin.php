@@ -43,7 +43,7 @@ class Admin extends BaseController
     public function delete()
     {
         $item = $this->entityManager->getRepository(Items::class)->find($this->serverRequest->get('id'));
-        if($item === null){
+        if($item === null) {
             throw new \InvalidArgumentException('Invalid Arguments');
         }
 

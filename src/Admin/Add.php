@@ -85,9 +85,9 @@ class Add
         $form->textarea('scripts', 'Скрипты');
         $form->text('slug', 'Уникальное имя')->addRule(Rules::REQUIRED)->setDescription('Используется в URL');
 
-//        $form->checkbox('groups', 'Группа')->fill(
-//            $this->entityManager->getRepository(Groups::class)->getGroupsArray()
-//        )->addRule(Rules::REQUIRED);
+        //        $form->checkbox('groups', 'Группа')->fill(
+        //            $this->entityManager->getRepository(Groups::class)->getGroupsArray()
+        //        )->addRule(Rules::REQUIRED);
 
         $form->submit('addblock', 'Добавить страницу');
         return $form;
@@ -105,7 +105,7 @@ class Add
             $this->entityManager->persist($page);
             $this->entityManager->flush();
 
-//            Redirect::http($this->urlGenerator->generate('pages/item', ['slug' => $page->getSlug()]));
+            //            Redirect::http($this->urlGenerator->generate('pages/item', ['slug' => $page->getSlug()]));
             Redirect::http($this->urlGenerator->generate('pages/admin/list'));
         } catch (OptimisticLockException | ORMException $e) {
             Error::code(500, $e->__toString());
