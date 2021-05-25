@@ -4,7 +4,7 @@
 namespace App\Module\Pages\Admin;
 
 
-use App\Module\Pages\Entities\Items;
+use App\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -14,8 +14,11 @@ use Enjoys\Forms\Rules;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Components\Helpers\Setting;
+use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
-use EnjoysCMS\WYSIWYG\Summernote\Summernote;
+use App\Module\Pages\Config;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
@@ -42,47 +45,43 @@ class Edit
      */
     private Environment $twig;
 
-    private ?Items $item;
+    private ?Page $page;
+    private ContainerInterface $container;
+    private ModuleConfig $config;
 
 
-    public function __construct(
-        RendererInterface $renderer,
-        EntityManager $entityManager,
-        ServerRequestInterface $serverRequest,
-        UrlGeneratorInterface $urlGenerator,
-        Environment $twig
-    ) {
-        $this->renderer = $renderer;
-        $this->entityManager = $entityManager;
-        $this->serverRequest = $serverRequest;
-        $this->urlGenerator = $urlGenerator;
-        $this->item = $entityManager->find(Items::class, $serverRequest->get('id'));
+    public function __construct(ContainerInterface $container)
+    {
+        $this->renderer = $container->get(RendererInterface::class);
+        $this->entityManager = $container->get(EntityManager::class);
+        $this->serverRequest = $container->get(ServerRequestInterface::class);
+        $this->urlGenerator = $container->get(UrlGeneratorInterface::class);
+        $this->page = $this->entityManager->find(Page::class, $this->serverRequest->get('id'));
 
-        if ($this->item === null) {
+        if ($this->page === null) {
             Error::code(404);
         }
-
 
         $form = $this->getForm();
         if ($form->isSubmitted()) {
             $this->doAction();
         }
         $this->renderer->setForm($form);
-
-        $this->twig = $twig;
+        $this->twig = $container->get(Environment::class);
+        $this->container = $container;
+        $this->config = Config::getConfig($this->container);
     }
 
     public function getContext(): array
     {
-        $wysiwyg = new WYSIWYG(new Summernote());
-        $wysiwyg->setTwig($this->twig);
+        $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
 
         return [
             'form' => $this->renderer,
             'wysiwyg' => $wysiwyg->selector('#body'),
-            'title' => 'Добавление страницы - Pages | Admin | ' . \EnjoysCMS\Core\Components\Helpers\Setting::get(
-                'sitename'
-            )
+            'title' => 'Добавление страницы - Pages | Admin | ' . Setting::get(
+                    'sitename'
+                )
         ];
     }
 
@@ -91,14 +90,14 @@ class Edit
         $form = new Form(['method' => 'post']);
         $form->setDefaults(
             [
-                'title' => $this->item->getTitle(),
-                'body' => $this->item->getBody(),
-                'scripts' => $this->item->getScripts(),
-                'slug' => $this->item->getSlug(),
-                'status' => [(string) $this->item->isStatus()]
+                'title' => $this->page->getTitle(),
+                'body' => $this->page->getBody(),
+                'scripts' => $this->page->getScripts(),
+                'slug' => $this->page->getSlug(),
+                'status' => [(string)$this->page->isStatus()]
             ]
         );
-        $form->checkbox('status')->fill(['1 ' =>'Активный']);
+        $form->checkbox('status')->fill(['1 ' => 'Активный']);
         $form->text('title', 'Название')->addRule(Rules::REQUIRED);
         $form->textarea('body', 'Контент')->addRule(Rules::REQUIRED)->setRows(10);
         $form->textarea('scripts', 'Скрипты');
@@ -116,12 +115,11 @@ class Edit
     private function doAction()
     {
         try {
-
-            $this->item->setTitle($this->serverRequest->post('title'));
-            $this->item->setBody($this->serverRequest->post('body'));
-            $this->item->setScripts($this->serverRequest->post('scripts'));
-            $this->item->setSlug($this->serverRequest->post('slug'));
-            $this->item->setStatus((bool)$this->serverRequest->post('status', 0));
+            $this->page->setTitle($this->serverRequest->post('title'));
+            $this->page->setBody($this->serverRequest->post('body'));
+            $this->page->setScripts($this->serverRequest->post('scripts'));
+            $this->page->setSlug($this->serverRequest->post('slug'));
+            $this->page->setStatus((bool)$this->serverRequest->post('status', 0));
 
             $this->entityManager->flush();
 

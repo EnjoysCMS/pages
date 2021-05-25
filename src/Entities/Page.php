@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(name="pages_items")
  */
-class Items
+class Page
 {
     /**
      * @ORM\Id

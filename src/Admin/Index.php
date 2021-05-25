@@ -4,27 +4,30 @@
 namespace App\Module\Pages\Admin;
 
 
-use App\Module\Pages\Entities\Items;
+use App\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ObjectRepository;
+use EnjoysCMS\Core\Components\Helpers\Setting;
 
 class Index
 {
 
     /**
-     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
+     * @var EntityRepository|ObjectRepository
      */
     private $pagesRepository;
 
     public function __construct(EntityManager $entityManager)
     {
-        $this->pagesRepository = $entityManager->getRepository(Items::class);
+        $this->pagesRepository = $entityManager->getRepository(Page::class);
     }
 
     public function getContext(): array
     {
         return   [
             'items' => $this->pagesRepository->findAll(),
-            'title' => 'Pages | Admin | ' . \EnjoysCMS\Core\Components\Helpers\Setting::get('sitename')
+            'title' => 'Pages | Admin | ' . Setting::get('sitename')
         ];
     }
 }

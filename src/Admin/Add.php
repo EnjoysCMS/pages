@@ -4,7 +4,8 @@
 namespace App\Module\Pages\Admin;
 
 
-use App\Module\Pages\Entities\Items;
+use App\Module\Pages\Config;
+use App\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -14,9 +15,12 @@ use Enjoys\Forms\Rules;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Components\Helpers\Setting;
+use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Core\Entities\Groups;
 use EnjoysCMS\WYSIWYG\Summernote\Summernote;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
@@ -47,14 +51,17 @@ class Add
      * @var Environment
      */
     private Environment $twig;
+    private ModuleConfig $config;
 
 
-    public function __construct(RendererInterface $renderer, EntityManager $entityManager, ServerRequestInterface $serverRequest, UrlGeneratorInterface $urlGenerator, Environment $twig)
+    public function __construct(ContainerInterface $container)
     {
-        $this->renderer = $renderer;
-        $this->entityManager = $entityManager;
-        $this->serverRequest = $serverRequest;
-        $this->urlGenerator = $urlGenerator;
+        $this->renderer = $container->get(RendererInterface::class);
+        $this->entityManager = $container->get(EntityManager::class);
+        $this->serverRequest = $container->get(ServerRequestInterface::class);
+        $this->urlGenerator = $container->get(UrlGeneratorInterface::class);
+
+        $this->config = Config::getConfig($this->container);
 
         $form = $this->getForm();
         if ($form->isSubmitted()) {
@@ -62,18 +69,18 @@ class Add
         }
         $this->renderer->setForm($form);
 
-        $this->twig = $twig;
+        $this->twig = $container->get(Environment::class);
     }
 
     public function getContext(): array
     {
-        $wysiwyg = new WYSIWYG(new Summernote());
-        $wysiwyg->setTwig($this->twig);
-
+        $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
         return [
             'form' => $this->renderer,
             'wysiwyg' => $wysiwyg->selector('#body'),
-            'title' => 'Добавление страницы - Pages | Admin | ' . \EnjoysCMS\Core\Components\Helpers\Setting::get('sitename')
+            'title' => 'Добавление страницы - Pages | Admin | ' . Setting::get(
+                    'sitename'
+                )
         ];
     }
 
@@ -96,7 +103,7 @@ class Add
     private function doAction()
     {
         try {
-            $page = new Items();
+            $page = new Page();
             $page->setTitle($this->serverRequest->post('title'));
             $page->setBody($this->serverRequest->post('body'));
             $page->setScripts($this->serverRequest->post('scripts'));

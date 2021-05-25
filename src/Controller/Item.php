@@ -4,7 +4,7 @@
 namespace App\Module\Pages\Controller;
 
 
-use App\Module\Pages\Entities\Items;
+use App\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
@@ -30,7 +30,7 @@ class Item
     public function __construct(ServerRequestInterface $serverRequest, EntityManager $entityManager, Environment $twig)
     {
         $this->serverRequest = $serverRequest;
-        $this->pagesRepository = $entityManager->getRepository(Items::class);
+        $this->pagesRepository = $entityManager->getRepository(Page::class);
         $this->twig = $twig;
     }
 
