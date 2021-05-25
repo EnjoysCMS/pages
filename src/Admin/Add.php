@@ -52,10 +52,12 @@ class Add
      */
     private Environment $twig;
     private ModuleConfig $config;
+    private ContainerInterface $container;
 
 
     public function __construct(ContainerInterface $container)
     {
+        $this->container = $container;
         $this->renderer = $container->get(RendererInterface::class);
         $this->entityManager = $container->get(EntityManager::class);
         $this->serverRequest = $container->get(ServerRequestInterface::class);
