@@ -13,7 +13,6 @@
   },
   "extra": {
     "module-name": "Страницы",
-    "use-migrations": true,
     "admin-links": {
       "pages/admin/list": "Обзор (Список)",
       "pages/admin/addpage": "Добавить страницу"
