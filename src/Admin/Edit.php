@@ -4,10 +4,13 @@
 namespace App\Module\Pages\Admin;
 
 
+use App\Module\Pages\Config;
 use App\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Doctrine\ORM\TransactionRequiredException;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
@@ -17,40 +20,30 @@ use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
-use App\Module\Pages\Config;
+use JetBrains\PhpStorm\ArrayShape;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
-class Edit
+final class Edit
 {
-    /**
-     * @var RendererInterface
-     */
     private RendererInterface $renderer;
-    /**
-     * @var EntityManager
-     */
     private EntityManager $entityManager;
-    /**
-     * @var ServerRequestInterface
-     */
     private ServerRequestInterface $serverRequest;
-    /**
-     * @var UrlGeneratorInterface
-     */
     private UrlGeneratorInterface $urlGenerator;
-    /**
-     * @var Environment
-     */
-    private Environment $twig;
-
     private ?Page $page;
-    private ContainerInterface $container;
     private ModuleConfig $config;
 
 
-    public function __construct(ContainerInterface $container)
+    /**
+     * @throws OptimisticLockException
+     * @throws ExceptionRule
+     * @throws ORMException
+     * @throws TransactionRequiredException
+     */
+    public function __construct(private ContainerInterface $container)
     {
         $this->renderer = $container->get(RendererInterface::class);
         $this->entityManager = $container->get(EntityManager::class);
@@ -67,11 +60,19 @@ class Edit
             $this->doAction();
         }
         $this->renderer->setForm($form);
-        $this->twig = $container->get(Environment::class);
-        $this->container = $container;
         $this->config = Config::getConfig($this->container);
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
+    #[ArrayShape([
+        'form' => "\Enjoys\Forms\Renderer\RendererInterface",
+        'wysiwyg' => "string",
+        'title' => "string"
+    ])]
     public function getContext(): array
     {
         $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
@@ -85,6 +86,9 @@ class Edit
         ];
     }
 
+    /**
+     * @throws ExceptionRule
+     */
     private function getForm(): Form
     {
         $form = new Form(['method' => 'post']);
@@ -97,16 +101,21 @@ class Edit
                 'status' => [(string)$this->page->isStatus()]
             ]
         );
-        $form->checkbox('status')->fill(['1 ' => 'Активный']);
-        $form->text('title', 'Название')->addRule(Rules::REQUIRED);
-        $form->textarea('body', 'Контент')->addRule(Rules::REQUIRED)->setRows(10);
+        $form->checkbox('status')
+            ->fill(['1 ' => 'Активный'])
+        ;
+        $form->text('title', 'Название')
+            ->addRule(Rules::REQUIRED)
+        ;
+        $form->textarea('body', 'Контент')
+            ->addRule(Rules::REQUIRED)
+            ->setRows(10)
+        ;
         $form->textarea('scripts', 'Скрипты');
-        $form->text('slug', 'Уникальное имя')->addRule(Rules::REQUIRED)->setDescription('Используется в URL');
-
-
-        //        $form->checkbox('groups', 'Группа')->fill(
-        //            $this->entityManager->getRepository(Groups::class)->getGroupsArray()
-        //        )->addRule(Rules::REQUIRED);
+        $form->text('slug', 'Уникальное имя')
+            ->addRule(Rules::REQUIRED)
+            ->setDescription('Используется в URL')
+        ;
 
         $form->submit('edit', 'Редактировать страницу');
         return $form;

@@ -10,14 +10,20 @@ use App\Module\Pages\Admin\Edit;
 use App\Module\Pages\Admin\Index;
 use App\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
-class Admin extends BaseController
+final class Admin extends BaseController
 {
 
     public function __construct(
@@ -31,14 +37,44 @@ class Admin extends BaseController
         $this->twigLoader->addPath(__DIR__ . '/../template', 'pages');
     }
 
-    public function edit(ContainerInterface $container)
-    {
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
+    #[Route(
+        path: '/pages/admin/edit@{id}',
+        name: 'pages/admin/editpage',
+        requirements: [
+        'id' => '\d+'
+        ],
+        options: [
+            'aclComment' => '[Pages][Admin] Редактирование страниц'
+        ]
+    )]
+    public function edit(
+        ContainerInterface $container
+    ): string {
         return $this->twig->render(
             '@pages/admin/edit.twig',
             $container->get(Edit::class)->getContext()
         );
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    #[Route(
+        path: '/pages/admin/delete@{id}',
+        name: 'pages/admin/delpage',
+        requirements: [
+        'id' => '\d+'
+        ],
+        options: [
+            'aclComment' => '[Pages][Admin] Удаление страниц'
+        ]
+    )]
     public function delete()
     {
         $item = $this->entityManager->getRepository(Page::class)->find($this->serverRequest->get('id'));
@@ -51,8 +87,19 @@ class Admin extends BaseController
         Redirect::http($this->urlGenerator->generate('pages/admin/list'));
     }
 
-
-    public function list()
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
+    #[Route(
+        path: '/pages/admin/list',
+        name: 'pages/admin/list',
+        options: [
+            'aclComment' => '[Pages][Admin] Список всех страниц (обзор)'
+        ]
+    )]
+    public function list(): string
     {
         return $this->twig->render(
             '@pages/admin/list.twig',
@@ -60,8 +107,19 @@ class Admin extends BaseController
         );
     }
 
-
-    public function add(ContainerInterface $container)
+    /**
+     * @throws RuntimeError
+     * @throws SyntaxError
+     * @throws LoaderError
+     */
+    #[Route(
+        path: '/pages/admin/addpage',
+        name: '/pages/admin/addpage',
+        options: [
+            'aclComment' => '[Pages][Admin] Добавить новую страницу'
+        ]
+    )]
+    public function add(ContainerInterface $container): string
     {
         return $this->twig->render(
             '@pages/admin/add.twig',

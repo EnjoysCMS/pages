@@ -1,41 +1,52 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\Module\Pages\Controller;
 
 
 use App\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Setting;
+use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
-class Item
+final class Item
 {
 
     /**
-     * @var ServerRequestInterface
-     */
-    private ServerRequestInterface $serverRequest;
-
-    /**
-     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
+     * @var EntityRepository|ObjectRepository
      */
     private $pagesRepository;
-    /**
-     * @var Environment
-     */
-    private Environment $twig;
 
-    public function __construct(ServerRequestInterface $serverRequest, EntityManager $entityManager, Environment $twig)
-    {
-        $this->serverRequest = $serverRequest;
+    public function __construct(
+        EntityManager $entityManager,
+        private ServerRequestInterface $serverRequest,
+        private Environment $twig
+    ) {
         $this->pagesRepository = $entityManager->getRepository(Page::class);
-        $this->twig = $twig;
     }
 
-    public function view()
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
+    #[Route(
+        path: '/info/{slug}.html',
+        name: 'pages/item',
+        options: [
+            'aclComment' => 'Просмотр страниц в public'
+        ]
+    )]
+    public function view(): string
     {
         /** @var Page $page */
         $page = $this->pagesRepository->findOneBy(['slug' => $this->serverRequest->get('slug'), 'status' => true]);

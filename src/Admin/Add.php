@@ -9,6 +9,7 @@ use App\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
@@ -18,46 +19,27 @@ use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
-use EnjoysCMS\Core\Entities\Group;
-use EnjoysCMS\WYSIWYG\Summernote\Summernote;
+use JetBrains\PhpStorm\ArrayShape;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
-class Add
+final class Add
 {
-
-    /**
-     * @var Form
-     */
-    private Form $form;
-    /**
-     * @var RendererInterface
-     */
     private RendererInterface $renderer;
-    /**
-     * @var EntityManager
-     */
     private EntityManager $entityManager;
-    /**
-     * @var ServerRequestInterface
-     */
     private ServerRequestInterface $serverRequest;
-    /**
-     * @var UrlGeneratorInterface
-     */
     private UrlGeneratorInterface $urlGenerator;
-    /**
-     * @var Environment
-     */
-    private Environment $twig;
     private ModuleConfig $config;
-    private ContainerInterface $container;
 
 
-    public function __construct(ContainerInterface $container)
+    /**
+     * @throws ExceptionRule
+     */
+    public function __construct(private ContainerInterface $container)
     {
-        $this->container = $container;
         $this->renderer = $container->get(RendererInterface::class);
         $this->entityManager = $container->get(EntityManager::class);
         $this->serverRequest = $container->get(ServerRequestInterface::class);
@@ -70,10 +52,18 @@ class Add
             $this->doAction();
         }
         $this->renderer->setForm($form);
-
-        $this->twig = $container->get(Environment::class);
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
+    #[ArrayShape([
+        'form' => "\Enjoys\Forms\Renderer\RendererInterface",
+        'wysiwyg' => "string",
+        'title' => "string"
+    ])]
     public function getContext(): array
     {
         $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
@@ -86,17 +76,24 @@ class Add
         ];
     }
 
+    /**
+     * @throws ExceptionRule
+     */
     private function getForm(): Form
     {
         $form = new Form(['method' => 'post']);
-        $form->text('title', 'Название')->addRule(Rules::REQUIRED);
-        $form->textarea('body', 'Контент')->addRule(Rules::REQUIRED)->setRows(10);
+        $form->text('title', 'Название')
+            ->addRule(Rules::REQUIRED)
+        ;
+        $form->textarea('body', 'Контент')
+            ->addRule(Rules::REQUIRED)
+            ->setRows(10)
+        ;
         $form->textarea('scripts', 'Скрипты');
-        $form->text('slug', 'Уникальное имя')->addRule(Rules::REQUIRED)->setDescription('Используется в URL');
-
-        //        $form->checkbox('groups', 'Группа')->fill(
-        //            $this->entityManager->getRepository(Groups::class)->getGroupsArray()
-        //        )->addRule(Rules::REQUIRED);
+        $form->text('slug', 'Уникальное имя')
+            ->addRule(Rules::REQUIRED)
+            ->setDescription('Используется в URL')
+        ;
 
         $form->submit('addblock', 'Добавить страницу');
         return $form;
@@ -114,7 +111,6 @@ class Add
             $this->entityManager->persist($page);
             $this->entityManager->flush();
 
-            //            Redirect::http($this->urlGenerator->generate('pages/item', ['slug' => $page->getSlug()]));
             Redirect::http($this->urlGenerator->generate('pages/admin/list'));
         } catch (OptimisticLockException | ORMException $e) {
             Error::code(500, $e->__toString());

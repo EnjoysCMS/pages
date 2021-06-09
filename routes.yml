@@ -11,25 +11,9 @@ pages/admin/addpage:
     aclComment: "[Pages][Admin] Добавить новую страницу"
 
 
-pages/admin/delpage:
-  path: /pages/admin/delete@{id}
-  controller: ['App\Module\Pages\Controller\Admin', 'delete']
-  requirements:
-    id: '\d+'
-  options:
-    aclComment: "[Pages][Admin] Удаление страниц"
 
-pages/admin/editpage:
-  path: /pages/admin/edit@{id}
-  controller: ['App\Module\Pages\Controller\Admin', 'edit']
-  requirements:
-    id: '\d+'
-  options:
-    aclComment: "[Pages][Admin] Редактирование страниц"
 
-pages/item:
-  path: /info/{slug}.html
-  controller: ['App\Module\Pages\Controller\Item', 'view']
-  options:
-    aclComment: "Просмотр страниц в public"
+
+
+
 

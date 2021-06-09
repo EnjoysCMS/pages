@@ -1,14 +1,10 @@
 <?php
 
-
 namespace App\Module\Pages\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Class Items
- *
- * @package                       App\Module\Pages\Entities
  * @ORM\Entity
  * @ORM\Table(name="pages_items")
  */

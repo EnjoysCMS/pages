@@ -9,8 +9,9 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
 use EnjoysCMS\Core\Components\Helpers\Setting;
+use JetBrains\PhpStorm\ArrayShape;
 
-class Index
+final class Index
 {
 
     /**
@@ -23,9 +24,14 @@ class Index
         $this->pagesRepository = $entityManager->getRepository(Page::class);
     }
 
+    #[ArrayShape([
+            'items' => "array|mixed[]|object[]",
+            'title' => "string"
+        ]
+    )]
     public function getContext(): array
     {
-        return   [
+        return [
             'items' => $this->pagesRepository->findAll(),
             'title' => 'Pages | Admin | ' . Setting::get('sitename')
         ];
