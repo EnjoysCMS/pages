@@ -19,5 +19,8 @@
       "pages/admin/list": "Обзор (Список)",
       "pages/admin/addpage": "Добавить страницу"
     }
+  },
+  "require-dev": {
+    "enjoyscms/core": "dev-master"
   }
 }
