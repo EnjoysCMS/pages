@@ -1,10 +1,10 @@
 <?php
 
+declare(strict_types=1);
 
-namespace App\Module\Pages\Admin;
+namespace EnjoysCMS\Module\Pages\Admin;
 
-
-use App\Module\Pages\Entities\Page;
+use EnjoysCMS\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;

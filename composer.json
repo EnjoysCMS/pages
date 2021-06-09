@@ -10,7 +10,7 @@
   },
   "autoload": {
     "psr-4": {
-      "App\\Module\\Pages\\": "src/"
+      "EnjoysCMS\\Module\\Pages\\": "src/"
     }
   },
   "extra": {

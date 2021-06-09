@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Module\Pages\Controller;
+namespace EnjoysCMS\Module\Pages\Controller;
 
-
-use App\Module\Pages\Entities\Page;
+use EnjoysCMS\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;

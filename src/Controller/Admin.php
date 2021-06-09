@@ -1,20 +1,20 @@
 <?php
 
+declare(strict_types=1);
 
-namespace App\Module\Pages\Controller;
-
+namespace EnjoysCMS\Module\Pages\Controller;
 
 use App\Module\Admin\BaseController;
-use App\Module\Pages\Admin\Add;
-use App\Module\Pages\Admin\Edit;
-use App\Module\Pages\Admin\Index;
-use App\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Module\Pages\Admin\Add;
+use EnjoysCMS\Module\Pages\Admin\Edit;
+use EnjoysCMS\Module\Pages\Admin\Index;
+use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -47,7 +47,7 @@ final class Admin extends BaseController
         name: 'pages/admin/editpage',
         requirements: [
         'id' => '\d+'
-        ],
+    ],
         options: [
             'aclComment' => '[Pages][Admin] Редактирование страниц'
         ]
@@ -70,7 +70,7 @@ final class Admin extends BaseController
         name: 'pages/admin/delpage',
         requirements: [
         'id' => '\d+'
-        ],
+    ],
         options: [
             'aclComment' => '[Pages][Admin] Удаление страниц'
         ]
@@ -119,8 +119,9 @@ final class Admin extends BaseController
             'aclComment' => '[Pages][Admin] Добавить новую страницу'
         ]
     )]
-    public function add(ContainerInterface $container): string
-    {
+    public function add(
+        ContainerInterface $container
+    ): string {
         return $this->twig->render(
             '@pages/admin/add.twig',
             $container->get(Add::class)->getContext()

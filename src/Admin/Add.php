@@ -1,11 +1,9 @@
 <?php
 
+declare(strict_types=1);
 
-namespace App\Module\Pages\Admin;
+namespace EnjoysCMS\Module\Pages\Admin;
 
-
-use App\Module\Pages\Config;
-use App\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -19,6 +17,8 @@ use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
+use EnjoysCMS\Module\Pages\Config;
+use EnjoysCMS\Module\Pages\Entities\Page;
 use JetBrains\PhpStorm\ArrayShape;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;

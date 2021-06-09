@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Module\Pages\Entities;
+namespace EnjoysCMS\Module\Pages\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
 

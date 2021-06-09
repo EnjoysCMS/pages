@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-
-namespace App\Module\Pages;
-
+namespace EnjoysCMS\Module\Pages;
 
 use DI\FactoryInterface;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
