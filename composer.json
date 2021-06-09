@@ -1,6 +1,7 @@
 {
   "name": "enjoyscms/pages",
   "description": "Module Pages for EnjoysCMS",
+  "license": "MIT",
   "type": "enjoyscms-module",
   "require": {
     "php": "^8.0",
