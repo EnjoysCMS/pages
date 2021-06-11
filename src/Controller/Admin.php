@@ -114,7 +114,7 @@ final class Admin extends BaseController
      */
     #[Route(
         path: '/pages/admin/addpage',
-        name: '/pages/admin/addpage',
+        name: 'pages/admin/addpage',
         options: [
             'aclComment' => '[Pages][Admin] Добавить новую страницу'
         ]
