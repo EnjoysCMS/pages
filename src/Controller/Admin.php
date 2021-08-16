@@ -26,15 +26,10 @@ use Twig\Error\SyntaxError;
 final class Admin extends BaseController
 {
 
-    public function __construct(
-        Environment $twig,
-        ServerRequestInterface $serverRequest,
-        EntityManager $entityManager,
-        UrlGeneratorInterface $urlGenerator,
-        RendererInterface $renderer
-    ) {
-        parent::__construct($twig, $serverRequest, $entityManager, $urlGenerator, $renderer);
-        $this->twigLoader->addPath(__DIR__ . '/../template', 'pages');
+    public function __construct(private ContainerInterface $container)
+    {
+        parent::__construct($this->container);
+        $this->getTwig()->getLoader()->addPath(__DIR__ . '/../template', 'pages');
     }
 
     /**
@@ -46,18 +41,16 @@ final class Admin extends BaseController
         path: '/pages/admin/edit@{id}',
         name: 'pages/admin/editpage',
         requirements: [
-        'id' => '\d+'
-    ],
+            'id' => '\d+'
+        ],
         options: [
             'aclComment' => '[Pages][Admin] Редактирование страниц'
         ]
     )]
-    public function edit(
-        ContainerInterface $container
-    ): string {
-        return $this->twig->render(
+    public function edit(): string {
+        return $this->getTwig()->render(
             '@pages/admin/edit.twig',
-            $container->get(Edit::class)->getContext()
+            $this->getContainer()->get(Edit::class)->getContext()
         );
     }
 
@@ -69,22 +62,22 @@ final class Admin extends BaseController
         path: '/pages/admin/delete@{id}',
         name: 'pages/admin/delpage',
         requirements: [
-        'id' => '\d+'
-    ],
+            'id' => '\d+'
+        ],
         options: [
             'aclComment' => '[Pages][Admin] Удаление страниц'
         ]
     )]
-    public function delete()
+    public function delete(EntityManager $entityManager, ServerRequestInterface $serverRequest, UrlGeneratorInterface $urlGenerator)
     {
-        $item = $this->entityManager->getRepository(Page::class)->find($this->serverRequest->get('id'));
+        $item = $entityManager->getRepository(Page::class)->find($serverRequest->get('id'));
         if ($item === null) {
             throw new \InvalidArgumentException('Invalid Arguments');
         }
 
-        $this->entityManager->remove($item);
-        $this->entityManager->flush();
-        Redirect::http($this->urlGenerator->generate('pages/admin/list'));
+        $entityManager->remove($item);
+        $entityManager->flush();
+        Redirect::http($urlGenerator->generate('pages/admin/list'));
     }
 
     /**
@@ -101,9 +94,9 @@ final class Admin extends BaseController
     )]
     public function list(): string
     {
-        return $this->twig->render(
+        return $this->getTwig()->render(
             '@pages/admin/list.twig',
-            (new Index($this->entityManager))->getContext()
+            $this->getContainer()->get(Index::class)->getContext()
         );
     }
 
@@ -119,12 +112,10 @@ final class Admin extends BaseController
             'aclComment' => '[Pages][Admin] Добавить новую страницу'
         ]
     )]
-    public function add(
-        ContainerInterface $container
-    ): string {
-        return $this->twig->render(
+    public function add(): string {
+        return $this->getTwig()->render(
             '@pages/admin/add.twig',
-            $container->get(Add::class)->getContext()
+            $this->getContainer()->get(Add::class)->getContext()
         );
     }
 }
