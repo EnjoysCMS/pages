@@ -8,17 +8,18 @@ use App\Module\Admin\BaseController;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Pages\Admin\Add;
 use EnjoysCMS\Module\Pages\Admin\Edit;
 use EnjoysCMS\Module\Pages\Admin\Index;
 use EnjoysCMS\Module\Pages\Entities\Page;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -33,9 +34,12 @@ final class Admin extends BaseController
     }
 
     /**
-     * @throws SyntaxError
-     * @throws RuntimeError
+     * @return ResponseInterface
+     * @throws ContainerExceptionInterface
      * @throws LoaderError
+     * @throws NotFoundExceptionInterface
+     * @throws RuntimeError
+     * @throws SyntaxError
      */
     #[Route(
         path: '/pages/admin/edit@{id}',
@@ -47,10 +51,13 @@ final class Admin extends BaseController
             'aclComment' => '[Pages][Admin] Редактирование страниц'
         ]
     )]
-    public function edit(): string {
-        return $this->getTwig()->render(
-            '@pages/admin/edit.twig',
-            $this->getContainer()->get(Edit::class)->getContext()
+    public function edit(): ResponseInterface
+    {
+        return $this->responseText(
+            $this->getTwig()->render(
+                '@pages/admin/edit.twig',
+                $this->getContainer()->get(Edit::class)->getContext()
+            )
         );
     }
 
@@ -68,8 +75,11 @@ final class Admin extends BaseController
             'aclComment' => '[Pages][Admin] Удаление страниц'
         ]
     )]
-    public function delete(EntityManager $entityManager, ServerRequestInterface $serverRequest, UrlGeneratorInterface $urlGenerator)
-    {
+    public function delete(
+        EntityManager $entityManager,
+        ServerRequestInterface $serverRequest,
+        UrlGeneratorInterface $urlGenerator
+    ) {
         $item = $entityManager->getRepository(Page::class)->find($serverRequest->get('id'));
         if ($item === null) {
             throw new \InvalidArgumentException('Invalid Arguments');
@@ -81,9 +91,12 @@ final class Admin extends BaseController
     }
 
     /**
-     * @throws SyntaxError
-     * @throws RuntimeError
+     * @return ResponseInterface
+     * @throws ContainerExceptionInterface
      * @throws LoaderError
+     * @throws NotFoundExceptionInterface
+     * @throws RuntimeError
+     * @throws SyntaxError
      */
     #[Route(
         path: '/pages/admin/list',
@@ -92,18 +105,23 @@ final class Admin extends BaseController
             'aclComment' => '[Pages][Admin] Список всех страниц (обзор)'
         ]
     )]
-    public function list(): string
+    public function list(): ResponseInterface
     {
-        return $this->getTwig()->render(
-            '@pages/admin/list.twig',
-            $this->getContainer()->get(Index::class)->getContext()
+        return $this->responseText(
+            $this->getTwig()->render(
+                '@pages/admin/list.twig',
+                $this->getContainer()->get(Index::class)->getContext()
+            )
         );
     }
 
     /**
+     * @return ResponseInterface
+     * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
-     * @throws LoaderError
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     #[Route(
         path: '/pages/admin/addpage',
@@ -112,10 +130,13 @@ final class Admin extends BaseController
             'aclComment' => '[Pages][Admin] Добавить новую страницу'
         ]
     )]
-    public function add(): string {
-        return $this->getTwig()->render(
-            '@pages/admin/add.twig',
-            $this->getContainer()->get(Add::class)->getContext()
+    public function add(): ResponseInterface
+    {
+        return $this->responseText(
+            $this->getTwig()->render(
+                '@pages/admin/add.twig',
+                $this->getContainer()->get(Add::class)->getContext()
+            )
         );
     }
 }
