@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Pages\Controller;
 
-use EnjoysCMS\Core\BaseController;
-use EnjoysCMS\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ObjectRepository;
-use Enjoys\Http\ServerRequestInterface;
+use EnjoysCMS\Core\BaseController;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Setting;
+use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
@@ -36,11 +33,13 @@ final class Item extends BaseController
     )]
     public function view(
         EntityManager $entityManager,
-        ServerRequestInterface $request,
         Environment $twig
     ): ResponseInterface {
+
         /** @var Page $page */
-        $page = $entityManager->getRepository(Page::class)->findOneBy(['slug' => $request->get('slug'), 'status' => true]);
+        $page = $entityManager->getRepository(Page::class)->findOneBy(
+            ['slug' => $this->request->getAttribute('slug'), 'status' => true]
+        );
         if ($page === null) {
             Error::code(404);
         }
@@ -51,16 +50,18 @@ final class Item extends BaseController
             $template_path = __DIR__ . '/../template/view.twig.sample';
         }
 
-        return $this->responseText($twig->render(
-            $template_path,
-            [
-                '_title' => sprintf(
-                    '%2$s - %1$s',
-                    Setting::get('sitename'),
-                    $page->getTitle()
-                ),
-                'page' => $page
-            ]
-        ));
+        return $this->responseText(
+            $twig->render(
+                $template_path,
+                [
+                    '_title' => sprintf(
+                        '%2$s - %1$s',
+                        Setting::get('sitename'),
+                        $page->getTitle()
+                    ),
+                    'page' => $page
+                ]
+            )
+        );
     }
 }
