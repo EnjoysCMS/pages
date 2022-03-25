@@ -8,7 +8,6 @@ use App\Module\Admin\BaseController;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Pages\Admin\Add;
 use EnjoysCMS\Module\Pages\Admin\Edit;
@@ -18,6 +17,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Error\LoaderError;
@@ -27,9 +27,9 @@ use Twig\Error\SyntaxError;
 final class Admin extends BaseController
 {
 
-    public function __construct(private ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
-        parent::__construct($this->container);
+        parent::__construct($container);
         $this->getTwig()->getLoader()->addPath(__DIR__ . '/../template', 'pages');
     }
 
@@ -77,10 +77,15 @@ final class Admin extends BaseController
     )]
     public function delete(
         EntityManager $entityManager,
-        ServerRequestInterface $serverRequest,
+        ServerRequestInterface $request,
         UrlGeneratorInterface $urlGenerator
     ) {
-        $item = $entityManager->getRepository(Page::class)->find($serverRequest->get('id'));
+        $item = $entityManager->getRepository(Page::class)->find(
+            $request->getAttribute(
+                'id',
+                $request->getQueryParams()['id'] ?? 0
+            )
+        );
         if ($item === null) {
             throw new \InvalidArgumentException('Invalid Arguments');
         }

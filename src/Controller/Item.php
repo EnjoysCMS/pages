@@ -10,6 +10,7 @@ use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
 use Twig\Error\LoaderError;
@@ -32,13 +33,14 @@ final class Item extends BaseController
         ]
     )]
     public function view(
+        ServerRequestInterface $request,
         EntityManager $entityManager,
         Environment $twig
     ): ResponseInterface {
 
         /** @var Page $page */
         $page = $entityManager->getRepository(Page::class)->findOneBy(
-            ['slug' => $this->request->getAttribute('slug'), 'status' => true]
+            ['slug' => $request->getAttribute('slug'), 'status' => true]
         );
         if ($page === null) {
             Error::code(404);

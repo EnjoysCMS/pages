@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Pages\Admin;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\Http\ServerRequestInterface;
-use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
@@ -21,6 +17,7 @@ use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use JetBrains\PhpStorm\ArrayShape;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -28,23 +25,19 @@ use Twig\Error\SyntaxError;
 
 final class Add
 {
-    private RendererInterface $renderer;
-    private EntityManager $entityManager;
-    private ServerRequestInterface $serverRequest;
-    private UrlGeneratorInterface $urlGenerator;
     private ModuleConfig $config;
 
 
     /**
      * @throws ExceptionRule
      */
-    public function __construct(private ContainerInterface $container)
-    {
-        $this->renderer = $container->get(RendererInterface::class);
-        $this->entityManager = $container->get(EntityManager::class);
-        $this->serverRequest = $container->get(ServerRequestInterface::class);
-        $this->urlGenerator = $container->get(UrlGeneratorInterface::class);
-
+    public function __construct(
+        private ContainerInterface $container,
+        private RendererInterface $renderer,
+        private EntityManager $entityManager,
+        private ServerRequestInterface $request,
+        private UrlGeneratorInterface $urlGenerator
+    ) {
         $this->config = Config::getConfig($this->container);
 
         $form = $this->getForm();
@@ -101,20 +94,16 @@ final class Add
 
     private function doAction()
     {
-        try {
-            $page = new Page();
-            $page->setTitle($this->serverRequest->post('title'));
-            $page->setBody($this->serverRequest->post('body'));
-            $page->setScripts($this->serverRequest->post('scripts'));
-            $page->setSlug($this->serverRequest->post('slug'));
-            $page->setStatus(true);
-            $this->entityManager->persist($page);
-            $this->entityManager->flush();
+        $page = new Page();
+        $page->setTitle($this->request->getParsedBody()['title'] ?? null);
+        $page->setBody($this->request->getParsedBody()['body'] ?? null);
+        $page->setScripts($this->request->getParsedBody()['scripts'] ?? null);
+        $page->setSlug($this->request->getParsedBody()['slug'] ?? null);
+        $page->setStatus(true);
+        $this->entityManager->persist($page);
+        $this->entityManager->flush();
 
-            Redirect::http($this->urlGenerator->generate('pages/admin/list'));
-        } catch (OptimisticLockException | ORMException $e) {
-            Error::code(500, $e->__toString());
-        }
+        Redirect::http($this->urlGenerator->generate('pages/admin/list'));
     }
 
 
