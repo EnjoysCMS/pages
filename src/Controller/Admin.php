@@ -8,6 +8,7 @@ use App\Module\Admin\BaseController;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Pages\Admin\Add;
 use EnjoysCMS\Module\Pages\Admin\Edit;
@@ -17,7 +18,6 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Error\LoaderError;
@@ -77,13 +77,13 @@ final class Admin extends BaseController
     )]
     public function delete(
         EntityManager $entityManager,
-        ServerRequestInterface $request,
+        ServerRequestWrapper $requestWrapper,
         UrlGeneratorInterface $urlGenerator
     ) {
         $item = $entityManager->getRepository(Page::class)->find(
-            $request->getAttribute(
+            $requestWrapper->getAttributesData(
                 'id',
-                $request->getQueryParams()['id'] ?? 0
+                $requestWrapper->getQueryData('id', 0)
             )
         );
         if ($item === null) {

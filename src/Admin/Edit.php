@@ -12,6 +12,7 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
@@ -21,7 +22,6 @@ use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use JetBrains\PhpStorm\ArrayShape;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -42,15 +42,15 @@ final class Edit
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
-        private ServerRequestInterface $request,
+        private ServerRequestWrapper $requestWrapper,
         private UrlGeneratorInterface $urlGenerator,
         private ContainerInterface $container
     ) {
         $this->page = $this->entityManager->find(
             Page::class,
-            $this->request->getAttribute(
+            $this->requestWrapper->getAttributesData(
                 'id',
-                $this->request->getQueryParams()['id'] ?? 0
+                $this->requestWrapper->getQueryData('id', 0)
             )
         );
 
@@ -126,11 +126,11 @@ final class Edit
 
     private function doAction()
     {
-        $this->page->setTitle($this->request->getParsedBody()['title'] ?? null);
-        $this->page->setBody($this->request->getParsedBody()['body'] ?? null);
-        $this->page->setScripts($this->request->getParsedBody()['scripts'] ?? null);
-        $this->page->setSlug($this->request->getParsedBody()['slug'] ?? null);
-        $this->page->setStatus((bool)$this->request->getParsedBody()['status'] ?? 0);
+        $this->page->setTitle($this->requestWrapper->getPostData('title'));
+        $this->page->setBody($this->requestWrapper->getPostData('body'));
+        $this->page->setScripts($this->requestWrapper->getPostData('scripts'));
+        $this->page->setSlug($this->requestWrapper->getPostData('slug'));
+        $this->page->setStatus((bool)$this->requestWrapper->getPostData('status', 0));
 
         $this->entityManager->flush();
 

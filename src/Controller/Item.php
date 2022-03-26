@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Pages\Controller;
 
 use Doctrine\ORM\EntityManager;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\BaseController;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
 use Twig\Error\LoaderError;
@@ -29,18 +29,18 @@ final class Item extends BaseController
         path: '/info/{slug}.html',
         name: 'pages/item',
         options: [
-            'aclComment' => 'Просмотр страниц в public'
+            'comment' => 'Просмотр страниц в public'
         ]
     )]
     public function view(
-        ServerRequestInterface $request,
+        ServerRequestWrapper $requestWrapper,
         EntityManager $entityManager,
         Environment $twig
     ): ResponseInterface {
 
         /** @var Page $page */
         $page = $entityManager->getRepository(Page::class)->findOneBy(
-            ['slug' => $request->getAttribute('slug'), 'status' => true]
+            ['slug' => $requestWrapper->getAttributesData('slug'), 'status' => true]
         );
         if ($page === null) {
             Error::code(404);
