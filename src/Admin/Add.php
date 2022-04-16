@@ -7,7 +7,7 @@ namespace EnjoysCMS\Module\Pages\Admin;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
-use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
@@ -74,7 +74,7 @@ final class Add
      */
     private function getForm(): Form
     {
-        $form = new Form(['method' => 'post']);
+        $form = new Form();
         $form->text('title', 'Название')
             ->addRule(Rules::REQUIRED)
         ;
