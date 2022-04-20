@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Pages\Controller;
 
-use App\Module\Admin\BaseController;
+
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Module\Admin\AdminBaseController;
 use EnjoysCMS\Module\Pages\Admin\Add;
 use EnjoysCMS\Module\Pages\Admin\Edit;
 use EnjoysCMS\Module\Pages\Admin\Index;
@@ -24,7 +25,7 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-final class Admin extends BaseController
+final class Admin extends AdminBaseController
 {
 
     public function __construct(ContainerInterface $container)
