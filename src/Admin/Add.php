@@ -16,7 +16,6 @@ use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
-use JetBrains\PhpStorm\ArrayShape;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Error\LoaderError;
@@ -52,11 +51,6 @@ final class Add
      * @throws RuntimeError
      * @throws LoaderError
      */
-    #[ArrayShape([
-        'form' => "\Enjoys\Forms\Renderer\RendererInterface",
-        'wysiwyg' => "string",
-        'title' => "string"
-    ])]
     public function getContext(): array
     {
         $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
@@ -65,7 +59,12 @@ final class Add
             'wysiwyg' => $wysiwyg->selector('#body'),
             'title' => 'Добавление страницы - Pages | Admin | ' . Setting::get(
                     'sitename'
-                )
+                ),
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                $this->urlGenerator->generate('pages/admin/list') => 'Страницы',
+                'Добавление новой страницы'
+            ],
         ];
     }
 
@@ -76,17 +75,14 @@ final class Add
     {
         $form = new Form();
         $form->text('title', 'Название')
-            ->addRule(Rules::REQUIRED)
-        ;
+            ->addRule(Rules::REQUIRED);
         $form->textarea('body', 'Контент')
             ->addRule(Rules::REQUIRED)
-            ->setRows(10)
-        ;
+            ->setRows(10);
         $form->textarea('scripts', 'Скрипты');
         $form->text('slug', 'Уникальное имя')
             ->addRule(Rules::REQUIRED)
-            ->setDescription('Используется в URL')
-        ;
+            ->setDescription('Используется в URL');
 
         $form->submit('addblock', 'Добавить страницу');
         return $form;

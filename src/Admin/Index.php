@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Pages\Admin;
 
-use EnjoysCMS\Module\Pages\Entities\Page;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
 use EnjoysCMS\Core\Components\Helpers\Setting;
-use JetBrains\PhpStorm\ArrayShape;
+use EnjoysCMS\Module\Pages\Entities\Page;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Index
 {
@@ -19,21 +19,20 @@ final class Index
      */
     private $pagesRepository;
 
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManager $entityManager, private UrlGeneratorInterface $urlGenerator)
     {
         $this->pagesRepository = $entityManager->getRepository(Page::class);
     }
 
-    #[ArrayShape([
-            'items' => "array|mixed[]|object[]",
-            'title' => "string"
-        ]
-    )]
     public function getContext(): array
     {
         return [
             'items' => $this->pagesRepository->findAll(),
-            'title' => 'Pages | Admin | ' . Setting::get('sitename')
+            'title' => 'Pages | Admin | ' . Setting::get('sitename'),
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                $this->urlGenerator->generate('pages/admin/list') => 'Страницы',
+            ],
         ];
     }
 }

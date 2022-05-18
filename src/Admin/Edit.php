@@ -20,7 +20,6 @@ use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
-use JetBrains\PhpStorm\ArrayShape;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Error\LoaderError;
@@ -71,11 +70,6 @@ final class Edit
      * @throws RuntimeError
      * @throws LoaderError
      */
-    #[ArrayShape([
-        'form' => "\Enjoys\Forms\Renderer\RendererInterface",
-        'wysiwyg' => "string",
-        'title' => "string"
-    ])]
     public function getContext(): array
     {
         $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
@@ -83,9 +77,14 @@ final class Edit
         return [
             'form' => $this->renderer,
             'wysiwyg' => $wysiwyg->selector('#body'),
-            'title' => 'Добавление страницы - Pages | Admin | ' . Setting::get(
+            'title' => 'Редактирование страницы - Pages | Admin | ' . Setting::get(
                     'sitename'
-                )
+                ),
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                $this->urlGenerator->generate('pages/admin/list') => 'Страницы',
+                sprintf('Редактирование страницы: %s', $this->page->getTitle())
+            ],
         ];
     }
 
