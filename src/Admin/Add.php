@@ -76,12 +76,13 @@ final class Add
         $form = new Form();
         $form->text('title', 'Название')
             ->addRule(Rules::REQUIRED);
+        $form->text('slug', 'Уникальное имя для url')
+            ->addRule(Rules::REQUIRED)
+            ->setDescription('Используется в URL');
         $form->textarea('body', 'Контент')
             ->setRows(10);
         $form->textarea('scripts', 'Скрипты');
-        $form->text('slug', 'Уникальное имя')
-            ->addRule(Rules::REQUIRED)
-            ->setDescription('Используется в URL');
+
 
         $form->submit('addblock', 'Добавить страницу');
         return $form;

@@ -104,19 +104,19 @@ final class Edit
             ]
         );
         $form->checkbox('status')
-            ->fill(['1 ' => 'Активный'])
-        ;
+            ->fill(['1 ' => 'Активный']);
+
         $form->text('title', 'Название')
+            ->addRule(Rules::REQUIRED);
+
+        $form->text('slug', 'Уникальное имя для url')
             ->addRule(Rules::REQUIRED)
-        ;
+            ->setDescription('Используется в URL');
+
         $form->textarea('body', 'Контент')
-            ->setRows(10)
-        ;
+            ->setRows(10);
         $form->textarea('scripts', 'Скрипты');
-        $form->text('slug', 'Уникальное имя')
-            ->addRule(Rules::REQUIRED)
-            ->setDescription('Используется в URL')
-        ;
+
 
         $form->submit('edit', 'Редактировать страницу');
         return $form;

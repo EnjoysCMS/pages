@@ -1,3 +1,7 @@
+!*.gitkeep
 .idea/
-/vendor/
-/composer.lock
+
+node_modules/
+
+vendor/
+composer.lock
