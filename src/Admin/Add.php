@@ -77,7 +77,6 @@ final class Add
         $form->text('title', 'Название')
             ->addRule(Rules::REQUIRED);
         $form->textarea('body', 'Контент')
-            ->addRule(Rules::REQUIRED)
             ->setRows(10);
         $form->textarea('scripts', 'Скрипты');
         $form->text('slug', 'Уникальное имя')
@@ -92,8 +91,8 @@ final class Add
     {
         $page = new Page();
         $page->setTitle($this->requestWrapper->getPostData('title'));
-        $page->setBody($this->requestWrapper->getPostData('body'));
-        $page->setScripts($this->requestWrapper->getPostData('scripts'));
+        $page->setBody($this->requestWrapper->getPostData('body', ''));
+        $page->setScripts($this->requestWrapper->getPostData('scripts', ''));
         $page->setSlug($this->requestWrapper->getPostData('slug'));
         $page->setStatus(true);
         $this->entityManager->persist($page);

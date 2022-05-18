@@ -110,7 +110,6 @@ final class Edit
             ->addRule(Rules::REQUIRED)
         ;
         $form->textarea('body', 'Контент')
-            ->addRule(Rules::REQUIRED)
             ->setRows(10)
         ;
         $form->textarea('scripts', 'Скрипты');
@@ -126,8 +125,8 @@ final class Edit
     private function doAction()
     {
         $this->page->setTitle($this->requestWrapper->getPostData('title'));
-        $this->page->setBody($this->requestWrapper->getPostData('body'));
-        $this->page->setScripts($this->requestWrapper->getPostData('scripts'));
+        $this->page->setBody($this->requestWrapper->getPostData('body', ''));
+        $this->page->setScripts($this->requestWrapper->getPostData('scripts', ''));
         $this->page->setSlug($this->requestWrapper->getPostData('slug'));
         $this->page->setStatus((bool)$this->requestWrapper->getPostData('status', 0));
 
