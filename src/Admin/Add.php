@@ -14,6 +14,7 @@ use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
+use EnjoysCMS\Core\Components\WYSIWYG\WysiwygConfig;
 use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Container\ContainerInterface;
@@ -53,7 +54,11 @@ final class Add
      */
     public function getContext(): array
     {
-        $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
+        $configWysiwyg = new WysiwygConfig($this->config->get('WYSIWYG'));
+
+        $wysiwyg = WYSIWYG::getInstance($configWysiwyg->getEditorName(), $this->container);
+        $wysiwyg->getEditor()->setTwigTemplate($configWysiwyg->getTemplate('crud'));
+
         return [
             'form' => $this->renderer,
             'wysiwyg' => $wysiwyg->selector('#body'),
