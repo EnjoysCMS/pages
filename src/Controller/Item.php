@@ -7,8 +7,8 @@ namespace EnjoysCMS\Module\Pages\Controller;
 use Doctrine\ORM\EntityManager;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\BaseController;
-use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Setting;
+use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,6 +24,7 @@ final class Item extends BaseController
      * @throws SyntaxError
      * @throws RuntimeError
      * @throws LoaderError
+     * @throws NotFoundException
      */
     #[Route(
         path: '/info/{slug}.html',
@@ -43,7 +44,7 @@ final class Item extends BaseController
             ['slug' => $requestWrapper->getAttributesData('slug'), 'status' => true]
         );
         if ($page === null) {
-            Error::code(404);
+            throw new NotFoundException();
         }
 
         $template_path = '@m/pages/view.twig';

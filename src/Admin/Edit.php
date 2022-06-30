@@ -6,20 +6,20 @@ namespace EnjoysCMS\Module\Pages\Admin;
 
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\TransactionRequiredException;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
-use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Core\Components\WYSIWYG\WysiwygConfig;
+use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Container\ContainerInterface;
@@ -39,6 +39,7 @@ final class Edit
      * @throws ExceptionRule
      * @throws ORMException
      * @throws TransactionRequiredException
+     * @throws NotFoundException
      */
     public function __construct(
         private RendererInterface $renderer,
@@ -56,7 +57,7 @@ final class Edit
         );
 
         if ($this->page === null) {
-            Error::code(404);
+            throw new NotFoundException();
         }
 
         $form = $this->getForm();
@@ -127,7 +128,11 @@ final class Edit
         return $form;
     }
 
-    private function doAction()
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    private function doAction(): void
     {
         $this->page->setTitle($this->requestWrapper->getPostData('title'));
         $this->page->setBody($this->requestWrapper->getPostData('body', ''));
