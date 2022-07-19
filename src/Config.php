@@ -4,18 +4,29 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Pages;
 
+use DI\DependencyException;
 use DI\FactoryInterface;
+use DI\NotFoundException;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
-use Psr\Container\ContainerInterface;
 
 final class Config
 {
+    private ModuleConfig $moduleConfig;
 
-    public static function getConfig(ContainerInterface $container): ModuleConfig
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    public function __construct(FactoryInterface $factory)
     {
-        return $container
-            ->get(FactoryInterface::class)
-            ->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/pages'])
-            ;
+        $this->moduleConfig = $factory->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/pages']);
     }
+
+
+    public function getModuleConfig(): ModuleConfig
+    {
+        return $this->moduleConfig;
+    }
+
+
 }

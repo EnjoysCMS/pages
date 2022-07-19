@@ -16,7 +16,6 @@ use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
-use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Core\Components\WYSIWYG\WysiwygConfig;
 use EnjoysCMS\Core\Exception\NotFoundException;
@@ -31,8 +30,6 @@ use Twig\Error\SyntaxError;
 final class Edit
 {
     private ?Page $page;
-    private ModuleConfig $config;
-
 
     /**
      * @throws OptimisticLockException
@@ -46,7 +43,8 @@ final class Edit
         private EntityManager $entityManager,
         private ServerRequestWrapper $requestWrapper,
         private UrlGeneratorInterface $urlGenerator,
-        private ContainerInterface $container
+        private ContainerInterface $container,
+        private Config $config
     ) {
         $this->page = $this->entityManager->find(
             Page::class,
@@ -65,7 +63,6 @@ final class Edit
             $this->doAction();
         }
         $this->renderer->setForm($form);
-        $this->config = Config::getConfig($this->container);
     }
 
     /**
@@ -75,7 +72,7 @@ final class Edit
      */
     public function getContext(): array
     {
-        $configWysiwyg = new WysiwygConfig($this->config->get('WYSIWYG'));
+        $configWysiwyg = new WysiwygConfig($this->config->getModuleConfig()->get('WYSIWYG'));
 
         $wysiwyg = WYSIWYG::getInstance($configWysiwyg->getEditorName(), $this->container);
         $wysiwyg->getEditor()->setTwigTemplate($configWysiwyg->getTemplate('crud'));
