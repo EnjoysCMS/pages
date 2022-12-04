@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Pages\Controller;
 
 use Doctrine\ORM\EntityManager;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\BaseController;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
 use Twig\Error\LoaderError;
@@ -34,14 +34,14 @@ final class Item extends BaseController
         ]
     )]
     public function view(
-        ServerRequestWrapper $requestWrapper,
+        ServerRequestInterface $request,
         EntityManager $entityManager,
         Environment $twig
     ): ResponseInterface {
 
         /** @var Page $page */
         $page = $entityManager->getRepository(Page::class)->findOneBy(
-            ['slug' => $requestWrapper->getAttributesData('slug'), 'status' => true]
+            ['slug' => $request->getAttribute('slug'), 'status' => true]
         );
         if ($page === null) {
             throw new NotFoundException();

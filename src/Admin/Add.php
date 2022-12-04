@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Pages\Admin;
 
+use DI\Container;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Core\Components\WYSIWYG\WysiwygConfig;
 use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
-use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -28,10 +28,10 @@ final class Add
      * @throws ExceptionRule
      */
     public function __construct(
-        private ContainerInterface $container,
+        private Container $container,
         private RendererInterface $renderer,
         private EntityManager $entityManager,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
         private Config $config
     ) {
@@ -92,10 +92,10 @@ final class Add
     private function doAction()
     {
         $page = new Page();
-        $page->setTitle($this->requestWrapper->getPostData('title'));
-        $page->setBody($this->requestWrapper->getPostData('body', ''));
-        $page->setScripts($this->requestWrapper->getPostData('scripts', ''));
-        $page->setSlug($this->requestWrapper->getPostData('slug'));
+        $page->setTitle($this->request->getParsedBody()['title'] ?? null);
+        $page->setBody($this->request->getParsedBody()['body'] ?? '');
+        $page->setScripts($this->request->getParsedBody()['scripts'] ?? '');
+        $page->setSlug($this->request->getParsedBody()['slug'] ?? null);
         $page->setStatus(true);
         $this->entityManager->persist($page);
         $this->entityManager->flush();

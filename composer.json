@@ -5,8 +5,8 @@
   "type": "enjoyscms-module",
   "require": {
     "php": ">=8.0",
-    "enjoyscms/core": "^4.0",
-    "enjoyscms/admin": "^4.0",
+    "enjoyscms/core": "^4.5",
+    "enjoyscms/admin": "^4.3",
     "enjoyscms/summernote": "^4.0"
   },
   "autoload": {
