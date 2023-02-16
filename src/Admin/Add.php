@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Pages\Admin;
 
-use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
+use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
-use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
-use EnjoysCMS\Core\Components\WYSIWYG\WysiwygConfig;
 use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
 
 final class Add
 {
@@ -28,14 +27,13 @@ final class Add
      * @throws ExceptionRule
      */
     public function __construct(
-        private Container $container,
         private RendererInterface $renderer,
         private EntityManager $entityManager,
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
+        private ContentEditor $contentEditor,
         private Config $config
     ) {
-
         $form = $this->getForm();
         if ($form->isSubmitted()) {
             $this->doAction();
@@ -44,20 +42,18 @@ final class Add
     }
 
     /**
-     * @throws SyntaxError
-     * @throws RuntimeError
-     * @throws LoaderError
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function getContext(): array
     {
-        $configWysiwyg = new WysiwygConfig($this->config->getModuleConfig()->get('WYSIWYG'));
-
-        $wysiwyg = WYSIWYG::getInstance($configWysiwyg->getEditorName(), $this->container);
-        $wysiwyg->getEditor()->setTwigTemplate($configWysiwyg->getTemplate('crud'));
-
         return [
             'form' => $this->renderer,
-            'wysiwyg' => $wysiwyg->selector('#body'),
+            'contentEditorEmbedCode' => $this->contentEditor->withConfig(
+                $this->config->getCrudContentEditor()
+            )->setSelector('#body')->getEmbedCode(),
             'title' => 'Добавление страницы - Pages | Admin | ' . Setting::get(
                     'sitename'
                 ),
@@ -76,12 +72,15 @@ final class Add
     {
         $form = new Form();
         $form->text('title', 'Название')
-            ->addRule(Rules::REQUIRED);
+            ->addRule(Rules::REQUIRED)
+        ;
         $form->text('slug', 'Уникальное имя для url')
             ->addRule(Rules::REQUIRED)
-            ->setDescription('Используется в URL');
+            ->setDescription('Используется в URL')
+        ;
         $form->textarea('body', 'Контент')
-            ->setRows(10);
+            ->setRows(10)
+        ;
         $form->textarea('scripts', 'Скрипты');
 
 

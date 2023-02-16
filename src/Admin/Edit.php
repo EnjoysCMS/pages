@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Pages\Admin;
 
 
-use DI\Container;
+use DI\DependencyException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
@@ -14,18 +14,16 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
+use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
-use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
-use EnjoysCMS\Core\Components\WYSIWYG\WysiwygConfig;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
 
 final class Edit
 {
@@ -43,7 +41,7 @@ final class Edit
         private EntityManager $entityManager,
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
-        private Container $container,
+        private ContentEditor $contentEditor,
         private Config $config
     ) {
         $this->page = $this->entityManager->find(
@@ -66,20 +64,18 @@ final class Edit
     }
 
     /**
-     * @throws SyntaxError
-     * @throws RuntimeError
-     * @throws LoaderError
+     * @throws DependencyException
+     * @throws \DI\NotFoundException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function getContext(): array
     {
-        $configWysiwyg = new WysiwygConfig($this->config->getModuleConfig()->get('WYSIWYG'));
-
-        $wysiwyg = WYSIWYG::getInstance($configWysiwyg->getEditorName(), $this->container);
-        $wysiwyg->getEditor()->setTwigTemplate($configWysiwyg->getTemplate('crud'));
-
         return [
             'form' => $this->renderer,
-            'wysiwyg' => $wysiwyg->selector('#body'),
+            'contentEditorEmbedCode' => $this->contentEditor->withConfig(
+                $this->config->getCrudContentEditor()
+            )->setSelector('#body')->getEmbedCode(),
             'title' => 'Редактирование страницы - Pages | Admin | ' . Setting::get(
                     'sitename'
                 ),
@@ -107,17 +103,21 @@ final class Edit
             ]
         );
         $form->checkbox('status')
-            ->fill(['1 ' => 'Активный']);
+            ->fill(['1 ' => 'Активный'])
+        ;
 
         $form->text('title', 'Название')
-            ->addRule(Rules::REQUIRED);
+            ->addRule(Rules::REQUIRED)
+        ;
 
         $form->text('slug', 'Уникальное имя для url')
             ->addRule(Rules::REQUIRED)
-            ->setDescription('Используется в URL');
+            ->setDescription('Используется в URL')
+        ;
 
         $form->textarea('body', 'Контент')
-            ->setRows(10);
+            ->setRows(10)
+        ;
         $form->textarea('scripts', 'Скрипты');
 
 

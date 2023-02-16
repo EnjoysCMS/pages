@@ -11,7 +11,7 @@ use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 
 final class Config
 {
-    private ModuleConfig $moduleConfig;
+    private ModuleConfig $config;
 
     /**
      * @throws DependencyException
@@ -19,13 +19,18 @@ final class Config
      */
     public function __construct(FactoryInterface $factory)
     {
-        $this->moduleConfig = $factory->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/pages']);
+        $this->config = $factory->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/pages']);
     }
 
 
-    public function getModuleConfig(): ModuleConfig
+    public function getConfig(): ModuleConfig
     {
-        return $this->moduleConfig;
+        return $this->config;
+    }
+
+    public function getCrudContentEditor(): ?string
+    {
+        return $this->config->get('editor')['crud'] ?? null;
     }
 
 

@@ -1,3 +1,2 @@
-WYSIWYG:
-  summernote:
-    crud:
+editor:
+  crud: null
