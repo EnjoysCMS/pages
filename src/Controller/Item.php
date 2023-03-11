@@ -6,6 +6,7 @@ namespace EnjoysCMS\Module\Pages\Controller;
 
 use Doctrine\ORM\EntityManager;
 use EnjoysCMS\Core\BaseController;
+use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Pages\Entities\Page;
@@ -36,7 +37,8 @@ final class Item extends BaseController
     public function view(
         ServerRequestInterface $request,
         EntityManager $entityManager,
-        Environment $twig
+        Environment $twig,
+        BreadcrumbsInterface $breadcrumbs
     ): ResponseInterface {
 
         /** @var Page $page */
@@ -53,6 +55,7 @@ final class Item extends BaseController
             $template_path = __DIR__ . '/../template/view.twig.sample';
         }
 
+        $breadcrumbs->add(null, $page->getTitle());
         return $this->responseText(
             $twig->render(
                 $template_path,
@@ -62,7 +65,8 @@ final class Item extends BaseController
                         Setting::get('sitename'),
                         $page->getTitle()
                     ),
-                    'page' => $page
+                    'page' => $page,
+                    'breadcrumbs' => $breadcrumbs->get()
                 ]
             )
         );
