@@ -28,12 +28,12 @@ final class Config
         return $this->config;
     }
 
-    public function getCrudContentEditor(): ?string
+    public function getCrudContentEditor(): null|string|array
     {
         return $this->config->get('editor')['crud'] ?? null;
     }
 
-    public function getScriptsContentEditor(): ?string
+    public function getScriptsContentEditor(): null|string|array
     {
         return $this->config->get('editor')['scripts'] ?? null;
     }
