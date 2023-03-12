@@ -52,8 +52,11 @@ final class Add
         return [
             'form' => $this->renderer,
             'contentEditorEmbedCode' => $this->contentEditor->withConfig(
-                $this->config->getCrudContentEditor()
-            )->setSelector('#body')->getEmbedCode(),
+                    $this->config->getCrudContentEditor()
+                )->setSelector('#body')->getEmbedCode()
+                . $this->contentEditor->withConfig(
+                    $this->config->getScriptsContentEditor()
+                )->setSelector('#scripts')->getEmbedCode(),
             'title' => 'Добавление страницы - Pages | Admin | ' . Setting::get(
                     'sitename'
                 ),
@@ -72,15 +75,12 @@ final class Add
     {
         $form = new Form();
         $form->text('title', 'Название')
-            ->addRule(Rules::REQUIRED)
-        ;
+            ->addRule(Rules::REQUIRED);
         $form->text('slug', 'Уникальное имя для url')
             ->addRule(Rules::REQUIRED)
-            ->setDescription('Используется в URL')
-        ;
+            ->setDescription('Используется в URL');
         $form->textarea('body', 'Контент')
-            ->setRows(10)
-        ;
+            ->setRows(10);
         $form->textarea('scripts', 'Скрипты');
 
 

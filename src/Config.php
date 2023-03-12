@@ -33,5 +33,10 @@ final class Config
         return $this->config->get('editor')['crud'] ?? null;
     }
 
+    public function getScriptsContentEditor(): ?string
+    {
+        return $this->config->get('editor')['scripts'] ?? null;
+    }
+
 
 }
