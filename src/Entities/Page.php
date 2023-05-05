@@ -2,7 +2,9 @@
 
 namespace EnjoysCMS\Module\Pages\Entities;
 
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Entity
@@ -41,6 +43,18 @@ class Page
      * @ORM\Column(type="string", unique=true)
      */
     private string $slug;
+
+    /**
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private DateTimeImmutable $createdAt;
+
+    /**
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private DateTimeImmutable $updatedAt;
 
     /**
      * @return int
@@ -128,5 +142,27 @@ class Page
     public function setSlug(string $slug): void
     {
         $this->slug = $slug;
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+
+    public function getUpdatedAt(): DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+
+    public function setCreatedAt(DateTimeImmutable $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    public function setUpdatedAt(DateTimeImmutable $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
     }
 }
