@@ -4,11 +4,11 @@ namespace EnjoysCMS\Module\Pages\Entities;
 
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Entity
  * @ORM\Table(name="pages_items")
+ * @ORM\HasLifecycleCallbacks()
  */
 class Page
 {
@@ -45,13 +45,11 @@ class Page
     private string $slug;
 
     /**
-     * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime_immutable")
      */
     private DateTimeImmutable $createdAt;
 
     /**
-     * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime_immutable")
      */
     private DateTimeImmutable $updatedAt;
@@ -155,14 +153,21 @@ class Page
         return $this->updatedAt;
     }
 
-
-    public function setCreatedAt(DateTimeImmutable $createdAt): void
+    /**
+     * @ORM\PrePersist
+     * @internal  Used LifecycleCallbacks
+     */
+    public function setCreatedAt(): void
     {
-        $this->createdAt = $createdAt;
+        $this->createdAt = new DateTimeImmutable();
     }
 
-    public function setUpdatedAt(DateTimeImmutable $updatedAt): void
+    /**
+     * @ORM\PreFlush
+     * @internal Used LifecycleCallbacks
+     */
+    public function setUpdatedAt(): void
     {
-        $this->updatedAt = $updatedAt;
+        $this->updatedAt = new DateTimeImmutable();
     }
 }

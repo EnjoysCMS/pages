@@ -7,6 +7,8 @@ namespace EnjoysCMS\Module\Pages\Admin;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
@@ -88,7 +90,11 @@ final class Add
         return $form;
     }
 
-    private function doAction()
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    private function doAction(): void
     {
         $page = new Page();
         $page->setTitle($this->request->getParsedBody()['title'] ?? null);

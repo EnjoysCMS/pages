@@ -6,8 +6,7 @@
     "require": {
         "php": "^8.0",
         "enjoyscms/core": "^4.7",
-        "enjoyscms/admin": "^4.3",
-        "gedmo/doctrine-extensions": "^3.0"
+        "enjoyscms/admin": "^4.3"
     },
     "autoload": {
         "psr-4": {
