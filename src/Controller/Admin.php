@@ -6,9 +6,10 @@ namespace EnjoysCMS\Module\Pages\Controller;
 
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\AdminBaseController;
 use EnjoysCMS\Module\Pages\Admin\Add;
 use EnjoysCMS\Module\Pages\Admin\Edit;
@@ -64,6 +65,7 @@ final class Admin extends AdminBaseController
 
     /**
      * @throws OptimisticLockException
+     * @throws NotSupported
      * @throws ORMException
      */
     #[Route(
@@ -79,8 +81,9 @@ final class Admin extends AdminBaseController
     public function delete(
         EntityManager $entityManager,
         ServerRequestInterface $request,
-        UrlGeneratorInterface $urlGenerator
-    ) {
+        UrlGeneratorInterface $urlGenerator,
+        RedirectInterface $redirect,
+    ): ResponseInterface {
         $item = $entityManager->getRepository(Page::class)->find(
             $request->getAttribute(
                 'id',
@@ -93,7 +96,7 @@ final class Admin extends AdminBaseController
 
         $entityManager->remove($item);
         $entityManager->flush();
-        Redirect::http($urlGenerator->generate('pages/admin/list'));
+        return $redirect->toRoute('pages/admin/list');
     }
 
     /**

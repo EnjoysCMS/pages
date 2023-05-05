@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Pages\Admin;
 
 use DI\DependencyException;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\TransactionRequiredException;
@@ -15,62 +16,62 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Components\Helpers\Setting;
+use EnjoysCMS\Core\Entities\Setting;
 use EnjoysCMS\Core\Exception\NotFoundException;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Edit
 {
-    private ?Page $page;
+    private Page $page;
 
     /**
      * @throws OptimisticLockException
-     * @throws ExceptionRule
      * @throws ORMException
      * @throws TransactionRequiredException
      * @throws NotFoundException
      */
     public function __construct(
         private RendererInterface $renderer,
-        private EntityManager $entityManager,
+        private EntityManager $em,
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
         private ContentEditor $contentEditor,
+        private RedirectInterface $redirect,
         private Config $config
     ) {
-        $this->page = $this->entityManager->find(
+        $this->page = $this->em->find(
             Page::class,
             $this->request->getAttribute(
                 'id',
                 $this->request->getQueryParams()['id'] ?? 0
             )
-        );
+        ) ?? throw new NotFoundException();
+    }
 
-        if ($this->page === null) {
-            throw new NotFoundException();
-        }
+
+    /**
+     * @throws OptimisticLockException
+     * @throws ExceptionRule
+     * @throws \DI\NotFoundException
+     * @throws ORMException
+     * @throws NotSupported
+     * @throws DependencyException
+     */
+    public function getContext(): array
+    {
+        $settingRepository = $this->em->getRepository(Setting::class);
 
         $form = $this->getForm();
         if ($form->isSubmitted()) {
             $this->doAction();
+            $this->redirect->toRoute('pages/admin/list', emit: true);
         }
         $this->renderer->setForm($form);
-    }
 
-    /**
-     * @throws DependencyException
-     * @throws \DI\NotFoundException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public function getContext(): array
-    {
         return [
             'form' => $this->renderer,
             'contentEditorEmbedCode' => $this->contentEditor->withConfig(
@@ -79,9 +80,9 @@ final class Edit
                 . $this->contentEditor->withConfig(
                     $this->config->getScriptsContentEditor()
                 )->setSelector('#scripts')->getEmbedCode(),
-            'title' => 'Редактирование страницы - Pages | Admin | ' . Setting::get(
+            '_title' => 'Редактирование страницы - Pages | Admin | ' . $settingRepository->find(
                     'sitename'
-                ),
+                )?->getValue(),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('pages/admin/list') => 'Страницы',
@@ -136,9 +137,7 @@ final class Edit
         $this->page->setSlug($this->request->getParsedBody()['slug'] ?? null);
         $this->page->setStatus((bool)($this->request->getParsedBody()['status'] ?? 0));
 
-        $this->entityManager->flush();
-
-        Redirect::http($this->urlGenerator->generate('pages/admin/list'));
+        $this->em->flush();
     }
 
 

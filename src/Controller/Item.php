@@ -42,8 +42,7 @@ final class Item
         Environment $twig,
         BreadcrumbsInterface $breadcrumbs,
     ): ResponseInterface {
-        /** @var array $setting */
-        $setting = $em->getRepository(Setting::class)->findAll();
+        $settingRepository = $em->getRepository(Setting::class);
 
         /** @var Page $page */
         $page = $em->getRepository(Page::class)->findOneBy(
@@ -64,7 +63,7 @@ final class Item
                 [
                     '_title' => sprintf(
                         '%2$s - %1$s',
-                        $setting['sitename'] ?? null,
+                        $settingRepository->find('sitename')?->getValue(),
                         $page->getTitle()
                     ),
                     'page' => $page,

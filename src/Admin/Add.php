@@ -14,8 +14,8 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Components\Helpers\Setting;
+use EnjoysCMS\Core\Entities\Setting;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Container\ContainerExceptionInterface;
@@ -25,32 +25,37 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Add
 {
-    /**
-     * @throws ExceptionRule
-     */
+
     public function __construct(
         private RendererInterface $renderer,
-        private EntityManager $entityManager,
+        private EntityManager $em,
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
         private ContentEditor $contentEditor,
+        private RedirectInterface $redirect,
         private Config $config
     ) {
-        $form = $this->getForm();
-        if ($form->isSubmitted()) {
-            $this->doAction();
-        }
-        $this->renderer->setForm($form);
     }
 
     /**
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
+     * @throws ExceptionRule
+     * @throws ORMException
+     * @throws ContainerExceptionInterface
+     * @throws DependencyException
+     * @throws OptimisticLockException
+     * @throws NotFoundException
      */
     public function getContext(): array
     {
+        $settingRepository = $this->em->getRepository(Setting::class);
+        $form = $this->getForm();
+        if ($form->isSubmitted()) {
+            $this->doAction();
+            $this->redirect->toRoute('pages/admin/list', emit: true);
+        }
+        $this->renderer->setForm($form);
+
         return [
             'form' => $this->renderer,
             'contentEditorEmbedCode' => $this->contentEditor->withConfig(
@@ -59,9 +64,9 @@ final class Add
                 . $this->contentEditor->withConfig(
                     $this->config->getScriptsContentEditor()
                 )->setSelector('#scripts')->getEmbedCode(),
-            'title' => 'Добавление страницы - Pages | Admin | ' . Setting::get(
+            '_title' => 'Добавление страницы - Pages | Admin | ' . $settingRepository->find(
                     'sitename'
-                ),
+                )?->getValue(),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('pages/admin/list') => 'Страницы',
@@ -90,6 +95,7 @@ final class Add
         return $form;
     }
 
+
     /**
      * @throws OptimisticLockException
      * @throws ORMException
@@ -102,10 +108,8 @@ final class Add
         $page->setScripts($this->request->getParsedBody()['scripts'] ?? '');
         $page->setSlug($this->request->getParsedBody()['slug'] ?? null);
         $page->setStatus(true);
-        $this->entityManager->persist($page);
-        $this->entityManager->flush();
-
-        Redirect::http($this->urlGenerator->generate('pages/admin/list'));
+        $this->em->persist($page);
+        $this->em->flush();
     }
 
 
