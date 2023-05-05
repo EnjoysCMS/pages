@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Pages\Controller;
 
 use Doctrine\ORM\EntityManager;
-use EnjoysCMS\Core\BaseController;
+use Doctrine\ORM\Exception\NotSupported;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
-use EnjoysCMS\Core\Components\Helpers\Setting;
+use EnjoysCMS\Core\Entities\Setting;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Http\Message\ResponseInterface;
@@ -18,36 +18,38 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-final class Item extends BaseController
+#[Route(
+    path: '/info/{slug}.html',
+    name: 'pages/item',
+    options: [
+        'comment' => 'Просмотр страниц в public'
+    ]
+)]
+final class Item
 {
 
     /**
      * @throws SyntaxError
+     * @throws NotSupported
      * @throws RuntimeError
      * @throws LoaderError
      * @throws NotFoundException
      */
-    #[Route(
-        path: '/info/{slug}.html',
-        name: 'pages/item',
-        options: [
-            'comment' => 'Просмотр страниц в public'
-        ]
-    )]
-    public function view(
+    public function __invoke(
         ServerRequestInterface $request,
-        EntityManager $entityManager,
+        ResponseInterface $response,
+        EntityManager $em,
         Environment $twig,
-        BreadcrumbsInterface $breadcrumbs
+        BreadcrumbsInterface $breadcrumbs,
     ): ResponseInterface {
+        /** @var array $setting */
+        $setting = $em->getRepository(Setting::class)->findAll();
 
         /** @var Page $page */
-        $page = $entityManager->getRepository(Page::class)->findOneBy(
+        $page = $em->getRepository(Page::class)->findOneBy(
             ['slug' => $request->getAttribute('slug'), 'status' => true]
-        );
-        if ($page === null) {
-            throw new NotFoundException();
-        }
+        ) ?? throw new NotFoundException();
+
 
         $template_path = '@m/pages/view.twig';
 
@@ -56,13 +58,13 @@ final class Item extends BaseController
         }
 
         $breadcrumbs->add(null, $page->getTitle());
-        return $this->responseText(
+        $response->getBody()->write(
             $twig->render(
                 $template_path,
                 [
                     '_title' => sprintf(
                         '%2$s - %1$s',
-                        Setting::get('sitename'),
+                        $setting['sitename'] ?? null,
                         $page->getTitle()
                     ),
                     'page' => $page,
@@ -70,5 +72,6 @@ final class Item extends BaseController
                 ]
             )
         );
+        return $response;
     }
 }
