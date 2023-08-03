@@ -5,60 +5,77 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Pages\Controller;
 
 
+use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use Enjoys\AssetsCollector\Assets;
+use Enjoys\Forms\Exception\ExceptionRule;
+use EnjoysCMS\Core\Breadcrumbs\BreadcrumbCollection;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
+use EnjoysCMS\Core\Routing\Annotation\Route;
+use EnjoysCMS\Core\Setting\Setting;
 use EnjoysCMS\Module\Admin\AdminBaseController;
 use EnjoysCMS\Module\Pages\Admin\Add;
 use EnjoysCMS\Module\Pages\Admin\Edit;
 use EnjoysCMS\Module\Pages\Admin\Index;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
+#[Route('pages/admin', '@pages_admin_',
+    options: [
+        'isAdmin' => true
+    ]
+)]
 final class Admin extends AdminBaseController
 {
 
-    public function __construct(ContainerInterface $container)
-    {
-        parent::__construct($container);
-        $this->getTwig()->getLoader()->addPath(__DIR__ . '/../template', 'pages');
-    }
+  public function __construct(
+      Container $container,
+      Environment $twig,
+      Assets $assets,
+      Setting $setting,
+      ResponseInterface $response,
+      BreadcrumbCollection $breadcrumbs
+  ) {
+      parent::__construct($container, $twig, $assets, $setting, $response, $breadcrumbs);
+      $this->twig->getLoader()->addPath(__DIR__ . '/../template', 'pages');
+  }
 
     /**
-     * @return ResponseInterface
-     * @throws ContainerExceptionInterface
      * @throws LoaderError
-     * @throws NotFoundExceptionInterface
+     * @throws NotSupported
+     * @throws ORMException
+     * @throws OptimisticLockException
      * @throws RuntimeError
      * @throws SyntaxError
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws ExceptionRule
      */
-    #[Route(
-        path: '/pages/admin/edit@{id}',
-        name: 'pages/admin/editpage',
+    #[Route('/edit@{id}',
+        name: 'edit',
         requirements: [
             'id' => '\d+'
         ],
-        options: [
-            'aclComment' => '[Pages][Admin] Редактирование страниц'
-        ]
+        comment: 'Редактирование страниц'
     )]
-    public function edit(): ResponseInterface
+    public function edit(Edit $edit): ResponseInterface
     {
-        return $this->responseText(
-            $this->getTwig()->render(
+        return $this->response(
+            $this->twig->render(
                 '@pages/admin/edit.twig',
-                $this->getContainer()->get(Edit::class)->getContext()
+                $edit->getContext()
             )
         );
     }
@@ -69,19 +86,16 @@ final class Admin extends AdminBaseController
      * @throws ORMException
      */
     #[Route(
-        path: '/pages/admin/delete@{id}',
-        name: 'pages/admin/delpage',
+        path: '/delete@{id}',
+        name: 'delete',
         requirements: [
             'id' => '\d+'
         ],
-        options: [
-            'aclComment' => '[Pages][Admin] Удаление страниц'
-        ]
+        comment: 'Удаление страниц'
     )]
     public function delete(
         EntityManager $entityManager,
         ServerRequestInterface $request,
-        UrlGeneratorInterface $urlGenerator,
         RedirectInterface $redirect,
     ): ResponseInterface {
         $item = $entityManager->getRepository(Page::class)->find(
@@ -100,51 +114,49 @@ final class Admin extends AdminBaseController
     }
 
     /**
-     * @return ResponseInterface
-     * @throws ContainerExceptionInterface
      * @throws LoaderError
-     * @throws NotFoundExceptionInterface
+     * @throws NotSupported
      * @throws RuntimeError
      * @throws SyntaxError
      */
     #[Route(
-        path: '/pages/admin/list',
-        name: 'pages/admin/list',
-        options: [
-            'aclComment' => '[Pages][Admin] Список всех страниц (обзор)'
-        ]
+        path: '/list',
+        name: 'list',
+        comment: 'Список всех страниц (обзор)'
     )]
-    public function list(): ResponseInterface
+    public function list(Index $index): ResponseInterface
     {
-        return $this->responseText(
-            $this->getTwig()->render(
+        return $this->response(
+            $this->twig->render(
                 '@pages/admin/list.twig',
-                $this->getContainer()->get(Index::class)->getContext()
+                $index->getContext()
             )
         );
     }
 
     /**
-     * @return ResponseInterface
+     * @throws ContainerExceptionInterface
+     * @throws DependencyException
+     * @throws ExceptionRule
      * @throws LoaderError
+     * @throws NotFoundException
+     * @throws NotFoundExceptionInterface
+     * @throws ORMException
+     * @throws OptimisticLockException
      * @throws RuntimeError
      * @throws SyntaxError
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     #[Route(
-        path: '/pages/admin/addpage',
-        name: 'pages/admin/addpage',
-        options: [
-            'aclComment' => '[Pages][Admin] Добавить новую страницу'
-        ]
+        path: '/add',
+        name: 'add',
+        comment: 'Добавить новую страницу'
     )]
-    public function add(): ResponseInterface
+    public function add(Add $add): ResponseInterface
     {
-        return $this->responseText(
-            $this->getTwig()->render(
+        return $this->response(
+            $this->twig->render(
                 '@pages/admin/add.twig',
-                $this->getContainer()->get(Add::class)->getContext()
+                $add->getContext()
             )
         );
     }

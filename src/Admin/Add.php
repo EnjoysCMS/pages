@@ -13,27 +13,28 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
-use EnjoysCMS\Core\Entities\Setting;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\Breadcrumbs\BreadcrumbCollection;
+use EnjoysCMS\Core\ContentEditor\ContentEditor;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
+use EnjoysCMS\Core\Setting\Setting;
 use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Add
 {
 
     public function __construct(
-        private RendererInterface $renderer,
-        private EntityManager $em,
-        private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator,
-        private ContentEditor $contentEditor,
-        private RedirectInterface $redirect,
-        private Config $config
+        private readonly RendererInterface $renderer,
+        private readonly EntityManager $em,
+        private readonly ServerRequestInterface $request,
+        private readonly ContentEditor $contentEditor,
+        private readonly RedirectInterface $redirect,
+        private readonly Setting $setting,
+        private readonly Config $config,
+        private readonly BreadcrumbCollection $breadcrumbs,
     ) {
     }
 
@@ -48,13 +49,15 @@ final class Add
      */
     public function getContext(): array
     {
-        $settingRepository = $this->em->getRepository(Setting::class);
         $form = $this->getForm();
         if ($form->isSubmitted()) {
             $this->doAction();
             $this->redirect->toRoute('pages/admin/list', emit: true);
         }
         $this->renderer->setForm($form);
+
+        $this->breadcrumbs->add('@pages_admin_list', 'Страницы')
+            ->setLastBreadcrumb('Добавление новой страницы');
 
         return [
             'form' => $this->renderer,
@@ -64,14 +67,10 @@ final class Add
                 . $this->contentEditor->withConfig(
                     $this->config->getScriptsContentEditor()
                 )->setSelector('#scripts')->getEmbedCode(),
-            '_title' => 'Добавление страницы - Pages | Admin | ' . $settingRepository->find(
+            '_title' => 'Добавление страницы - Pages | Admin | ' . $this->setting->get(
                     'sitename'
-                )?->getValue(),
-            'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
-                $this->urlGenerator->generate('pages/admin/list') => 'Страницы',
-                'Добавление новой страницы'
-            ],
+                ),
+            'breadcrumbs' => $this->breadcrumbs
         ];
     }
 

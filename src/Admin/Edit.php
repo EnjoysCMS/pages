@@ -15,14 +15,14 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
-use EnjoysCMS\Core\Entities\Setting;
+use EnjoysCMS\Core\Breadcrumbs\BreadcrumbCollection;
+use EnjoysCMS\Core\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Exception\NotFoundException;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
+use EnjoysCMS\Core\Setting\Setting;
 use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Edit
 {
@@ -35,13 +35,14 @@ final class Edit
      * @throws NotFoundException
      */
     public function __construct(
-        private RendererInterface $renderer,
-        private EntityManager $em,
-        private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator,
-        private ContentEditor $contentEditor,
-        private RedirectInterface $redirect,
-        private Config $config
+        private readonly RendererInterface $renderer,
+        private readonly EntityManager $em,
+        private readonly ServerRequestInterface $request,
+        private readonly ContentEditor $contentEditor,
+        private readonly RedirectInterface $redirect,
+        private readonly Setting $setting,
+        private readonly Config $config,
+        private readonly BreadcrumbCollection $breadcrumbs
     ) {
         $this->page = $this->em->find(
             Page::class,
@@ -63,14 +64,16 @@ final class Edit
      */
     public function getContext(): array
     {
-        $settingRepository = $this->em->getRepository(Setting::class);
-
         $form = $this->getForm();
         if ($form->isSubmitted()) {
             $this->doAction();
             $this->redirect->toRoute('pages/admin/list', emit: true);
         }
         $this->renderer->setForm($form);
+
+        $this->breadcrumbs
+            ->add('@pages_admin_list', 'Страницы')
+            ->setLastBreadcrumb(sprintf('Редактирование страницы: %s', $this->page->getTitle()));
 
         return [
             'form' => $this->renderer,
@@ -80,14 +83,10 @@ final class Edit
                 . $this->contentEditor->withConfig(
                     $this->config->getScriptsContentEditor()
                 )->setSelector('#scripts')->getEmbedCode(),
-            '_title' => 'Редактирование страницы - Pages | Admin | ' . $settingRepository->find(
+            '_title' => 'Редактирование страницы - Pages | Admin | ' . $this->setting->get(
                     'sitename'
-                )?->getValue(),
-            'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
-                $this->urlGenerator->generate('pages/admin/list') => 'Страницы',
-                sprintf('Редактирование страницы: %s', $this->page->getTitle())
-            ],
+                ),
+            'breadcrumbs' => $this->breadcrumbs,
         ];
     }
 

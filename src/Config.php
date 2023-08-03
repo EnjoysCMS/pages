@@ -4,38 +4,63 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Pages;
 
-use DI\DependencyException;
-use DI\FactoryInterface;
-use DI\NotFoundException;
-use EnjoysCMS\Core\Components\Modules\ModuleConfig;
+
+use EnjoysCMS\Core\Modules\ModuleCollection;
+use InvalidArgumentException;
+use Symfony\Component\Yaml\Yaml;
 
 final class Config
 {
-    private ModuleConfig $config;
 
-    /**
-     * @throws DependencyException
-     * @throws NotFoundException
-     */
-    public function __construct(FactoryInterface $factory)
+    private const MODULE_NAME = 'enjoyscms/pages';
+
+    public function __construct(
+        private readonly \Enjoys\Config\Config $config,
+        ModuleCollection $moduleCollection
+    ) {
+        $module = $moduleCollection->find(self::MODULE_NAME) ?? throw new InvalidArgumentException(
+            sprintf(
+                'Module %s not found. Name must be same like packageName in module composer.json',
+                self::MODULE_NAME
+            )
+        );
+
+
+        if (file_exists($module->path . '/config.yml')) {
+            $config->addConfig(
+                [
+                    self::MODULE_NAME => file_get_contents($module->path . '/config.yml')
+                ],
+                ['flags' => Yaml::PARSE_CONSTANT],
+                \Enjoys\Config\Config::YAML,
+                false
+            );
+        }
+    }
+
+    public function get(string $key = null, mixed $default = null): mixed
     {
-        $this->config = $factory->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/pages']);
+        if ($key === null) {
+            return $this->config->get(self::MODULE_NAME);
+        }
+        return $this->config->get(sprintf('%s->%s', self::MODULE_NAME, $key), $default);
     }
 
 
-    public function getConfig(): ModuleConfig
+    public function all(): array
     {
-        return $this->config;
+        return $this->config->get();
     }
+
 
     public function getCrudContentEditor(): null|string|array
     {
-        return $this->config->get('editor')['crud'] ?? null;
+        return $this->get('editor->crud');
     }
 
     public function getScriptsContentEditor(): null|string|array
     {
-        return $this->config->get('editor')['scripts'] ?? null;
+        return $this->get('editor->scripts');
     }
 
 

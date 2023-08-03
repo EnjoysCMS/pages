@@ -6,24 +6,23 @@ namespace EnjoysCMS\Module\Pages\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
-use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
-use EnjoysCMS\Core\Entities\Setting;
+use EnjoysCMS\Core\Breadcrumbs\Breadcrumb;
+use EnjoysCMS\Core\Breadcrumbs\BreadcrumbCollection;
+use EnjoysCMS\Core\Breadcrumbs\BreadcrumbInterface;
 use EnjoysCMS\Core\Exception\NotFoundException;
+use EnjoysCMS\Core\Routing\Annotation\Route;
+use EnjoysCMS\Core\Setting\Setting;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-#[Route(
-    path: '/info/{slug}.html',
-    name: 'pages/item',
-    options: [
-        'comment' => 'Просмотр страниц в public'
-    ]
+#[Route('/info/{slug}.html',
+    name: 'pages_view',
+    comment: 'Просмотр страниц в public'
 )]
 final class Item
 {
@@ -40,9 +39,9 @@ final class Item
         ResponseInterface $response,
         EntityManager $em,
         Environment $twig,
-        BreadcrumbsInterface $breadcrumbs,
+        BreadcrumbCollection $breadcrumbs,
+        Setting $setting
     ): ResponseInterface {
-        $settingRepository = $em->getRepository(Setting::class);
 
         /** @var Page $page */
         $page = $em->getRepository(Page::class)->findOneBy(
@@ -63,11 +62,11 @@ final class Item
                 [
                     '_title' => sprintf(
                         '%2$s - %1$s',
-                        $settingRepository->find('sitename')?->getValue(),
+                        $setting->get('sitename'),
                         $page->getTitle()
                     ),
                     'page' => $page,
-                    'breadcrumbs' => $breadcrumbs->get()
+                    'breadcrumbs' => $breadcrumbs
                 ]
             )
         );

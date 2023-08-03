@@ -6,15 +6,18 @@ namespace EnjoysCMS\Module\Pages\Admin;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
-use EnjoysCMS\Core\Entities\Setting;
+use EnjoysCMS\Core\Breadcrumbs\BreadcrumbCollection;
+use EnjoysCMS\Core\Setting\Setting;
 use EnjoysCMS\Module\Pages\Entities\Page;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Index
 {
 
-    public function __construct(private EntityManager $em, private UrlGeneratorInterface $urlGenerator)
-    {
+    public function __construct(
+        private readonly EntityManager $em,
+        private readonly Setting $setting,
+        private readonly BreadcrumbCollection $breadcrumbs
+    ) {
     }
 
     /**
@@ -22,15 +25,12 @@ final class Index
      */
     public function getContext(): array
     {
-        $settingRepository = $this->em->getRepository(Setting::class);
+        $this->breadcrumbs->setLastBreadcrumb('Страницы', '@pages_admin_list');
 
         return [
             'items' => $this->em->getRepository(Page::class)->findAll(),
-            'title' => 'Pages | Admin | ' . $settingRepository->find('sitename')?->getValue(),
-            'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
-                $this->urlGenerator->generate('pages/admin/list') => 'Страницы',
-            ],
+            'title' => 'Pages | Admin | ' . $this->setting->get('sitename')?->getValue(),
+            'breadcrumbs' => $this->breadcrumbs,
         ];
     }
 }
