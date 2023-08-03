@@ -120,9 +120,8 @@ final class Admin extends AdminBaseController
      * @throws SyntaxError
      */
     #[Route(
-        path: '/list',
+        path: '/list1',
         name: 'list',
-        comment: 'Список всех страниц (обзор)'
     )]
     public function list(Index $index): ResponseInterface
     {
@@ -149,7 +148,6 @@ final class Admin extends AdminBaseController
     #[Route(
         path: '/add',
         name: 'add',
-        comment: 'Добавить новую страницу'
     )]
     public function add(Add $add): ResponseInterface
     {
