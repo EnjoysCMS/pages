@@ -120,7 +120,7 @@ final class Admin extends AdminBaseController
      * @throws SyntaxError
      */
     #[Route(
-        path: '/list1',
+        path: '',
         name: 'list',
     )]
     public function list(Index $index): ResponseInterface
