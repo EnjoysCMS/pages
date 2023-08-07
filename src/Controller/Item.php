@@ -22,6 +22,7 @@ use Twig\Error\SyntaxError;
 
 #[Route('/info/{slug}.html',
     name: 'pages_view',
+    title: '[PAGES] Просмотр страницы',
     comment: 'Просмотр страниц в public'
 )]
 final class Item
