@@ -12,12 +12,9 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Enjoys\AssetsCollector\Assets;
 use Enjoys\Forms\Exception\ExceptionRule;
-use EnjoysCMS\Core\Breadcrumbs\BreadcrumbCollection;
 use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Core\Routing\Annotation\Route;
-use EnjoysCMS\Core\Setting\Setting;
 use EnjoysCMS\Module\Admin\AdminBaseController;
 use EnjoysCMS\Module\Pages\Admin\Add;
 use EnjoysCMS\Module\Pages\Admin\Edit;
@@ -27,7 +24,6 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -40,17 +36,11 @@ use Twig\Error\SyntaxError;
 final class Admin extends AdminBaseController
 {
 
-  public function __construct(
-      Container $container,
-      Environment $twig,
-      Assets $assets,
-      Setting $setting,
-      ResponseInterface $response,
-      BreadcrumbCollection $breadcrumbs
-  ) {
-      parent::__construct($container, $twig, $assets, $setting, $response, $breadcrumbs);
-      $this->twig->getLoader()->addPath(__DIR__ . '/../template', 'pages');
-  }
+    public function __construct(Container $container)
+    {
+        parent::__construct($container);
+        $this->twig->getLoader()->addPath(__DIR__ . '/../template', 'pages');
+    }
 
     /**
      * @throws LoaderError
