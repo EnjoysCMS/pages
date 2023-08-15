@@ -32,13 +32,18 @@ final class Add
             ->addRule(Rules::REQUIRED);
         $form->text('slug', 'Уникальное имя для url')
             ->addRule(Rules::REQUIRED)
+            ->addRule(Rules::CALLBACK, 'Такой url уже существует', function () {
+                return $this->em->getRepository(Page::class)->findOneBy([
+                        'slug' => $this->request->getParsedBody()['slug'] ?? ''
+                    ]) === null;
+            })
             ->setDescription('Используется в URL');
         $form->textarea('body', 'Контент')
             ->setRows(10);
         $form->textarea('scripts', 'Скрипты');
 
 
-        $form->submit('addblock', 'Добавить страницу');
+        $form->submit('add', 'Добавить страницу');
         return $form;
     }
 

@@ -62,6 +62,16 @@ final class Edit
 
         $form->text('slug', 'Уникальное имя для url')
             ->addRule(Rules::REQUIRED)
+            ->addRule(Rules::CALLBACK, 'Такой url уже существует', function () {
+                $item = $this->em->getRepository(Page::class)->findOneBy([
+                    'slug' => $this->request->getParsedBody()['slug'] ?? ''
+                ]);
+
+                if ($item?->getId() === $this->getPage()->getId()) {
+                    return true;
+                }
+                return $item === null;
+            })
             ->setDescription('Используется в URL');
 
         $form->textarea('body', 'Контент')
