@@ -89,10 +89,10 @@ final class Edit
      */
     public function doAction(): void
     {
-        $this->page->setTitle($this->request->getParsedBody()['title'] ?? null);
+        $this->page->setTitle($this->request->getParsedBody()['title'] ?? '');
         $this->page->setBody($this->request->getParsedBody()['body'] ?? '');
         $this->page->setScripts($this->request->getParsedBody()['scripts'] ?? '');
-        $this->page->setSlug($this->request->getParsedBody()['slug'] ?? null);
+        $this->page->setSlug($this->request->getParsedBody()['slug'] ?? '');
         $this->page->setStatus((bool)($this->request->getParsedBody()['status'] ?? 0));
 
         $this->em->flush();
