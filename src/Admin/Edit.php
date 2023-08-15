@@ -5,22 +5,14 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Pages\Admin;
 
 
-use DI\DependencyException;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\TransactionRequiredException;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
-use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Core\Breadcrumbs\BreadcrumbCollection;
-use EnjoysCMS\Core\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Exception\NotFoundException;
-use EnjoysCMS\Core\Http\Response\RedirectInterface;
-use EnjoysCMS\Core\Setting\Setting;
-use EnjoysCMS\Module\Pages\Config;
 use EnjoysCMS\Module\Pages\Entities\Page;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -35,14 +27,8 @@ final class Edit
      * @throws NotFoundException
      */
     public function __construct(
-        private readonly RendererInterface $renderer,
         private readonly EntityManager $em,
         private readonly ServerRequestInterface $request,
-        private readonly ContentEditor $contentEditor,
-        private readonly RedirectInterface $redirect,
-        private readonly Setting $setting,
-        private readonly Config $config,
-        private readonly BreadcrumbCollection $breadcrumbs
     ) {
         $this->page = $this->em->find(
             Page::class,
@@ -53,47 +39,10 @@ final class Edit
         ) ?? throw new NotFoundException();
     }
 
-
-    /**
-     * @throws OptimisticLockException
-     * @throws ExceptionRule
-     * @throws \DI\NotFoundException
-     * @throws ORMException
-     * @throws NotSupported
-     * @throws DependencyException
-     */
-    public function getContext(): array
-    {
-        $form = $this->getForm();
-        if ($form->isSubmitted()) {
-            $this->doAction();
-            $this->redirect->toRoute('pages/admin/list', emit: true);
-        }
-        $this->renderer->setForm($form);
-
-        $this->breadcrumbs
-            ->add('@pages_admin_list', 'Страницы')
-            ->setLastBreadcrumb(sprintf('Редактирование страницы: %s', $this->page->getTitle()));
-
-        return [
-            'form' => $this->renderer,
-            'contentEditorEmbedCode' => $this->contentEditor->withConfig(
-                    $this->config->getCrudContentEditor()
-                )->setSelector('#body')->getEmbedCode()
-                . $this->contentEditor->withConfig(
-                    $this->config->getScriptsContentEditor()
-                )->setSelector('#scripts')->getEmbedCode(),
-            '_title' => 'Редактирование страницы - Pages | Admin | ' . $this->setting->get(
-                    'sitename'
-                ),
-            'breadcrumbs' => $this->breadcrumbs,
-        ];
-    }
-
     /**
      * @throws ExceptionRule
      */
-    private function getForm(): Form
+    public function getForm(): Form
     {
         $form = new Form();
         $form->setDefaults(
@@ -128,7 +77,7 @@ final class Edit
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    private function doAction(): void
+    public function doAction(): void
     {
         $this->page->setTitle($this->request->getParsedBody()['title'] ?? null);
         $this->page->setBody($this->request->getParsedBody()['body'] ?? '');
@@ -137,6 +86,11 @@ final class Edit
         $this->page->setStatus((bool)($this->request->getParsedBody()['status'] ?? 0));
 
         $this->em->flush();
+    }
+
+    public function getPage(): Page
+    {
+        return $this->page;
     }
 
 
