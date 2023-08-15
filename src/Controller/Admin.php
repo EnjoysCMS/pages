@@ -15,11 +15,12 @@ use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Exception\ExceptionRule;
 use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Core\Routing\Annotation\Route;
-use EnjoysCMS\Module\Admin\AdminBaseController;
+use EnjoysCMS\Module\Admin\AdminController;
 use EnjoysCMS\Module\Pages\Admin\Add;
 use EnjoysCMS\Module\Pages\Admin\Edit;
 use EnjoysCMS\Module\Pages\Admin\Index;
 use EnjoysCMS\Module\Pages\Entities\Page;
+use InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -33,7 +34,7 @@ use Twig\Error\SyntaxError;
         'isAdmin' => true
     ]
 )]
-final class Admin extends AdminBaseController
+final class Admin extends AdminController
 {
 
     public function __construct(Container $container)
@@ -95,7 +96,7 @@ final class Admin extends AdminBaseController
             )
         );
         if ($item === null) {
-            throw new \InvalidArgumentException('Invalid Arguments');
+            throw new InvalidArgumentException('Invalid Arguments');
         }
 
         $entityManager->remove($item);
