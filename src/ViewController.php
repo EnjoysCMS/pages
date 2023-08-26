@@ -10,6 +10,7 @@ use EnjoysCMS\Core\AbstractController;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Pages\Entities\Page;
+use Invoker\InvokerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -30,7 +31,7 @@ final class ViewController extends AbstractController
      * @throws LoaderError
      * @throws NotFoundException
      */
-    public function __invoke(EntityManager $em): ResponseInterface
+    public function __invoke(EntityManager $em, InvokerInterface $invoker, Config $config): ResponseInterface
     {
         /** @var Page $page */
         $page = $em->getRepository(Page::class)->findOneBy(
@@ -50,11 +51,26 @@ final class ViewController extends AbstractController
             $this->twig->render(
                 $template_path,
                 [
-                    '_title' => sprintf(
-                        '%2$s - %1$s',
-                        $this->setting->get('sitename'),
-                        $page->getTitle()
-                    ),
+                    'meta' => [
+                        'title' => $invoker->call(
+                            $config->get('pageMetaTitleCallback') ?? function (Page $page) {
+                            return sprintf(
+                                '%2$s - %1$s',
+                                $this->setting->get('sitename'),
+                                $page->getTitle()
+                            );
+                        },
+                            ['page' => $page]
+                        ),
+                        'description' => $invoker->call(
+                            $config->get('pageMetaDescriptionCallback') ?? fn() => null,
+                            ['page' => $page]
+                        ),
+                        'keywords' => $invoker->call(
+                            $config->get('pageMetaKeywordsCallback') ?? fn() => null,
+                            ['page' => $page]
+                        ),
+                    ],
                     'page' => $page,
                     'breadcrumbs' => $this->breadcrumbs
                 ]
