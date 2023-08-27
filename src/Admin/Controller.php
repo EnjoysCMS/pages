@@ -50,6 +50,7 @@ final class Controller extends AdminController
      * @throws DependencyException
      * @throws NotFoundException
      * @throws ExceptionRule
+     * @throws \EnjoysCMS\Core\Exception\NotFoundException
      */
     #[Route('/edit@{id}',
         name: 'edit',
@@ -59,14 +60,22 @@ final class Controller extends AdminController
         comment: 'Редактирование страниц'
     )]
     public function edit(
-        Edit $edit,
+        AddEditPageForm $edit,
         \EnjoysCMS\Module\Pages\Config $config,
         Config $adminConfig,
         ContentEditor $contentEditor,
     ): ResponseInterface {
-        $form = $edit->getForm();
+        $page = $this->container->get(EntityManager::class)->find(
+            Page::class,
+            $this->request->getAttribute(
+                'id',
+                $this->request->getQueryParams()['id'] ?? 0
+            )
+        ) ?? throw new \EnjoysCMS\Core\Exception\NotFoundException();
+
+        $form = $edit->getForm($page);
         if ($form->isSubmitted()) {
-            $edit->doAction();
+            $edit->doAction($page);
             return $this->redirect->toRoute('@pages_admin_list');
         }
 
@@ -75,7 +84,7 @@ final class Controller extends AdminController
 
         $this->breadcrumbs
             ->add('@pages_admin_list', 'Страницы')
-            ->setLastBreadcrumb(sprintf('Редактирование страницы: %s', $edit->getPage()->getTitle()));
+            ->setLastBreadcrumb(sprintf('Редактирование страницы: %s', $page->getTitle()));
 
         return $this->response(
             $this->twig->render(
@@ -167,7 +176,7 @@ final class Controller extends AdminController
         name: 'add',
     )]
     public function add(
-        Add $add,
+        AddEditPageForm $add,
         Config $adminConfig,
         \EnjoysCMS\Module\Pages\Config $config,
         ContentEditor $contentEditor,
