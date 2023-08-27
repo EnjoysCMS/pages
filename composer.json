@@ -21,8 +21,8 @@
         }
     },
     "scripts": {
-        "post-install-cmd": "EnjoysCMS\\Module\\Pages\\Composer::assetsInstall",
-        "post-update-cmd": "EnjoysCMS\\Module\\Pages\\Composer::assetsInstall"
+        "post-install-cmd": "EnjoysCMS\\Module\\Pages\\Assets::install",
+        "post-update-cmd": "EnjoysCMS\\Module\\Pages\\Assets::install"
     },
     "require-dev": {
         "vimeo/psalm": "^4.20 | ^5.0",
