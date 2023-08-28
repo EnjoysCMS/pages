@@ -63,7 +63,7 @@ final class AddEditPageForm
         $form->textarea('scripts', 'Скрипты');
 
 
-        $form->submit('edit', 'Редактировать страницу');
+        $form->submit('edit', 'Сохранить');
         return $form;
     }
 

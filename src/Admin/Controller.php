@@ -154,7 +154,7 @@ final class Controller extends AdminController
                 '@pages/admin/list.twig',
                 [
                     'items' => $em->getRepository(Page::class)->findAll(),
-                    'title' => 'Pages | Admin | ' . $this->setting->get('sitename')?->getValue()
+                    'title' => 'Pages | Admin | ' . $this->setting->get('sitename')
                 ]
             )
         );
