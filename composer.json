@@ -10,7 +10,8 @@
     },
     "autoload": {
         "psr-4": {
-            "EnjoysCMS\\Module\\Pages\\": "src/"
+            "EnjoysCMS\\Module\\Pages\\": "src/",
+            "EnjoysCMS\\Module\\Pages\\Composer\\Scripts\\": "scripts/"
         }
     },
     "extra": {
@@ -21,8 +22,9 @@
         }
     },
     "scripts": {
-        "post-install-cmd": "EnjoysCMS\\Module\\Pages\\Assets::install",
-        "post-update-cmd": "EnjoysCMS\\Module\\Pages\\Assets::install"
+        "pages-assets-install": "EnjoysCMS\\Module\\Pages\\Composer\\Scripts\\AssetsInstallCommand",
+        "post-install-cmd": "@pages-assets-install",
+        "post-update-cmd": "@pages-assets-install"
     },
     "require-dev": {
         "vimeo/psalm": "^4.20 | ^5.0",
