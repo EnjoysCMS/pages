@@ -24,11 +24,11 @@
     "scripts": {
         "pages-assets-install": "EnjoysCMS\\Module\\Pages\\Composer\\Scripts\\AssetsInstallCommand",
         "post-install-cmd": [
-            "echo -e \"\\x1b[1mPages\\x1b[00m\"",
+            "@print-module-name Pages",
             "@pages-assets-install"
         ],
         "post-update-cmd": [
-            "echo -e \"\\x1b[1mPages\\x1b[00m\"",
+            "@print-module-name Pages",
             "@pages-assets-install"
         ]
     },
