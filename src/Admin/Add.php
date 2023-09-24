@@ -81,15 +81,22 @@ final class Add
     private function getForm(): Form
     {
         $form = new Form();
+
         $form->text('title', 'Название')
             ->addRule(Rules::REQUIRED);
+
         $form->text('slug', 'Уникальное имя для url')
             ->addRule(Rules::REQUIRED)
             ->setDescription('Используется в URL');
+
         $form->textarea('body', 'Контент')
             ->setRows(10);
+
         $form->textarea('scripts', 'Скрипты');
 
+        $form->textarea('metaDescription', 'meta-description');
+
+        $form->text('metaKeywords', 'meta-keywords');
 
         $form->submit('addblock', 'Добавить страницу');
         return $form;
@@ -107,6 +114,8 @@ final class Add
         $page->setBody($this->request->getParsedBody()['body'] ?? '');
         $page->setScripts($this->request->getParsedBody()['scripts'] ?? '');
         $page->setSlug($this->request->getParsedBody()['slug'] ?? null);
+        $page->setMetaDescription($this->request->getParsedBody()['metaDescription'] ?? null);
+        $page->setMetaKeywords($this->request->getParsedBody()['metaKeywords'] ?? null);
         $page->setStatus(true);
         $this->em->persist($page);
         $this->em->flush();

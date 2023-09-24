@@ -101,6 +101,8 @@ final class Edit
             [
                 'title' => $this->page->getTitle(),
                 'body' => $this->page->getBody(),
+                'metaDescription' => $this->page->getMetaDescription(),
+                'metaKeywords' => $this->page->getMetaKeywords(),
                 'scripts' => $this->page->getScripts(),
                 'slug' => $this->page->getSlug(),
                 'status' => [(string)$this->page->isStatus()]
@@ -118,8 +120,12 @@ final class Edit
 
         $form->textarea('body', 'Контент')
             ->setRows(10);
+
         $form->textarea('scripts', 'Скрипты');
 
+        $form->textarea('metaDescription', 'meta-description');
+
+        $form->text('metaKeywords', 'meta-keywords');
 
         $form->submit('edit', 'Редактировать страницу');
         return $form;
@@ -134,6 +140,8 @@ final class Edit
         $this->page->setTitle($this->request->getParsedBody()['title'] ?? null);
         $this->page->setBody($this->request->getParsedBody()['body'] ?? '');
         $this->page->setScripts($this->request->getParsedBody()['scripts'] ?? '');
+        $this->page->setMetaDescription($this->request->getParsedBody()['metaDescription'] ?? null);
+        $this->page->setMetaKeywords($this->request->getParsedBody()['metaKeywords'] ?? null);
         $this->page->setSlug($this->request->getParsedBody()['slug'] ?? null);
         $this->page->setStatus((bool)($this->request->getParsedBody()['status'] ?? 0));
 
