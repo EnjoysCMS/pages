@@ -30,6 +30,16 @@ class Page
     private string $body;
 
     /**
+     * @ORM\Column(type="text", name="meta_description", nullable=true)
+     */
+    private ?string $metaDescription = null;
+
+    /**
+     * @ORM\Column(type="string", name="meta_keywords", length=500, nullable=true)
+     */
+    private ?string $metaKeywords = null;
+
+    /**
      * @ORM\Column(type="text")
      */
     private string $scripts;
@@ -169,5 +179,25 @@ class Page
     public function setUpdatedAt(): void
     {
         $this->updatedAt = new DateTimeImmutable();
+    }
+
+    public function getMetaDescription(): ?string
+    {
+        return $this->metaDescription;
+    }
+
+    public function setMetaDescription(?string $metaDescription): void
+    {
+        $this->metaDescription = $metaDescription;
+    }
+
+    public function getMetaKeywords(): ?string
+    {
+        return $this->metaKeywords;
+    }
+
+    public function setMetaKeywords(?string $metaKeywords): void
+    {
+        $this->metaKeywords = $metaKeywords;
     }
 }

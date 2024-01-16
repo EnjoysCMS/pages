@@ -35,6 +35,8 @@ final class AddEditPageForm
                 'body' => $page?->getBody(),
                 'scripts' => $page?->getScripts(),
                 'slug' => $page?->getSlug(),
+                'metaDescription' => $page?->getMetaDescription(),
+                'metaKeywords' => $page?->getMetaKeywords(),
                 'status' => [(string)($page?->isStatus() ?? true)]
             ]
         );
@@ -62,6 +64,9 @@ final class AddEditPageForm
             ->setRows(10);
         $form->textarea('scripts', 'Скрипты');
 
+        $form->textarea('metaDescription', 'meta-description');
+
+        $form->text('metaKeywords', 'meta-keywords');
 
         $form->submit('edit', 'Сохранить');
         return $form;
@@ -79,6 +84,9 @@ final class AddEditPageForm
         $page->setScripts($this->request->getParsedBody()['scripts'] ?? '');
         $page->setSlug($this->request->getParsedBody()['slug'] ?? '');
         $page->setStatus((bool)($this->request->getParsedBody()['status'] ?? 0));
+        $page->setMetaDescription($this->request->getParsedBody()['metaDescription'] ?? null);
+        $page->setMetaKeywords($this->request->getParsedBody()['metaKeywords'] ?? null);
+
         $this->em->persist($page);
         $this->em->flush();
     }
