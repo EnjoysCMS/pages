@@ -36,7 +36,8 @@
         "vimeo/psalm": "^4.20 | ^5.0",
         "phpunit/phpunit": "^9.5",
         "symfony/var-dumper": "^5.2",
-        "rector/rector": "^0.19.6"
+        "rector/rector": "^0.19.6",
+        "weirdan/doctrine-psalm-plugin": "^2.9"
     },
     "config": {
         "allow-plugins": {

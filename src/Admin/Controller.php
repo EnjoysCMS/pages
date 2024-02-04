@@ -13,6 +13,7 @@ use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Exception\ExceptionRule;
+use Enjoys\Forms\Renderer\Renderer;
 use EnjoysCMS\Core\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Core\Routing\Annotation\Route;
@@ -37,6 +38,7 @@ final class Controller extends AdminController
     public function __construct(Container $container)
     {
         parent::__construct($container);
+        /** @psalm-suppress UndefinedInterfaceMethod */
         $this->twig->getLoader()->addPath(__DIR__ . '/../template', 'pages');
     }
 
@@ -79,8 +81,8 @@ final class Controller extends AdminController
             return $this->redirect->toRoute('@pages_admin_list');
         }
 
+        /** @var Renderer $rendererForm */
         $rendererForm = $adminConfig->getRendererForm();
-        $rendererForm->setForm($form);
 
         $this->breadcrumbs
             ->add('@pages_admin_list', 'Страницы')
@@ -90,7 +92,7 @@ final class Controller extends AdminController
             $this->twig->render(
                 '@pages/admin/edit.twig',
                 [
-                    'form' => $rendererForm,
+                    'form' => $rendererForm->setForm($form),
                     'contentEditorEmbedCode' => $contentEditor->withConfig(
                             $config->getCrudContentEditor()
                         )->setSelector('#body')->getEmbedCode()
@@ -187,8 +189,8 @@ final class Controller extends AdminController
             return $this->redirect->toRoute('@pages_admin_list');
         }
 
+        /** @var Renderer $rendererForm */
         $rendererForm = $adminConfig->getRendererForm();
-        $rendererForm->setForm($form);
 
         $this->breadcrumbs->add('@pages_admin_list', 'Страницы')
             ->setLastBreadcrumb('Добавление новой страницы');
@@ -197,7 +199,7 @@ final class Controller extends AdminController
             $this->twig->render(
                 '@pages/admin/add.twig',
                 [
-                    'form' => $rendererForm,
+                    'form' => $rendererForm->setForm($form),
                     'contentEditorEmbedCode' => $contentEditor->withConfig(
                             $config->getCrudContentEditor()
                         )->setSelector('#body')->getEmbedCode()

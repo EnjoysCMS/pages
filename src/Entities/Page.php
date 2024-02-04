@@ -5,6 +5,9 @@ namespace EnjoysCMS\Module\Pages\Entities;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @psalm-suppress MissingConstructor
+ */
 #[ORM\Table(name: 'pages_items')]
 #[ORM\Entity]
 #[ORM\HasLifecycleCallbacks]
