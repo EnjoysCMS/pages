@@ -26,7 +26,7 @@ final class AddEditPageForm
     /**
      * @throws ExceptionRule
      */
-    public function getForm(Page $page = null): Form
+    public function getForm(?Page $page = null): Form
     {
         $form = new Form();
         $form->setDefaults(
@@ -76,7 +76,7 @@ final class AddEditPageForm
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function doAction(Page $page = null): void
+    public function doAction(?Page $page = null): void
     {
         $page = $page ?? new Page();
         $page->setTitle($this->request->getParsedBody()['title'] ?? '');
