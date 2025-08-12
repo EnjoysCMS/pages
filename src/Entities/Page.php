@@ -45,6 +45,10 @@ class Page
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $updatedAt;
 
+    #[ORM\Column(type: 'string', nullable: true, options: ['default' => null])]
+    private ?string $customTemplatePath = null;
+
+
     public function getId(): int
     {
         return $this->id;
@@ -148,5 +152,15 @@ class Page
     public function setMetaKeywords(?string $metaKeywords): void
     {
         $this->metaKeywords = $metaKeywords;
+    }
+
+    public function getCustomTemplatePath(): ?string
+    {
+        return $this->customTemplatePath;
+    }
+
+    public function setCustomTemplatePath(?string $customTemplatePath): void
+    {
+        $this->customTemplatePath = $customTemplatePath;
     }
 }

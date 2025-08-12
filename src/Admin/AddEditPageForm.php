@@ -37,6 +37,7 @@ final class AddEditPageForm
                 'slug' => $page?->getSlug(),
                 'metaDescription' => $page?->getMetaDescription(),
                 'metaKeywords' => $page?->getMetaKeywords(),
+                'customTemplatePath' => $page?->getCustomTemplatePath(),
                 'status' => [(string)($page?->isStatus() ?? true)]
             ]
         );
@@ -68,6 +69,8 @@ final class AddEditPageForm
 
         $form->text('metaKeywords', 'meta-keywords');
 
+        $form->text('customTemplatePath', 'Пользовательский шаблон отображения');
+
         $form->submit('edit', 'Сохранить');
         return $form;
     }
@@ -86,6 +89,7 @@ final class AddEditPageForm
         $page->setStatus((bool)($this->request->getParsedBody()['status'] ?? 0));
         $page->setMetaDescription($this->request->getParsedBody()['metaDescription'] ?? null);
         $page->setMetaKeywords($this->request->getParsedBody()['metaKeywords'] ?? null);
+        $page->setCustomTemplatePath($this->request->getParsedBody()['customTemplatePath'] ?? null);
 
         $this->em->persist($page);
         $this->em->flush();
